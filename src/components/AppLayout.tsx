@@ -9,8 +9,8 @@ const navItems = [
   { to: "/workers", label: "Workers", icon: Users },
   { to: "/attendance", label: "Attendance", icon: CalendarCheck },
   { to: "/salary", label: "Salary", icon: IndianRupee },
-  { to: "/campaigns", label: "AI Campaigns", icon: Megaphone },
-  { to: "/profile", label: "Profile", icon: User },
+  { to: "/campaign", label: "AI Campaigns", icon: Megaphone },
+  { to: "/business-profile", label: "Profile", icon: User },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/auth");
+    navigate("/login");
   };
 
   return (
