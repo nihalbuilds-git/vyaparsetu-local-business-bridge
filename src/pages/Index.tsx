@@ -33,7 +33,7 @@ export default function Index() {
           The simplest business tool for local Indian shopkeepers. Manage workers, attendance, salary & more.
         </p>
         <div className="flex gap-3">
-          <Button onClick={() => navigate("/auth")} className="gradient-primary text-primary-foreground gap-2 px-6 py-3 text-base">
+          <Button onClick={() => navigate("/login")} className="gradient-primary text-primary-foreground gap-2 px-6 py-3 text-base">
             Get Started <ArrowRight size={16} />
           </Button>
         </div>
