@@ -49,6 +49,65 @@ export type Database = {
           },
         ]
       }
+      businesses: {
+        Row: {
+          address: string | null
+          category: string | null
+          created_at: string
+          id: string
+          name: string | null
+          owner_id: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          owner_id: string
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          message: string | null
+          poster_url: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          poster_url?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          poster_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -87,6 +146,7 @@ export type Database = {
       }
       workers: {
         Row: {
+          business_id: string | null
           created_at: string
           daily_salary: number
           id: string
@@ -98,6 +158,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          business_id?: string | null
           created_at?: string
           daily_salary?: number
           id?: string
@@ -109,6 +170,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          business_id?: string | null
           created_at?: string
           daily_salary?: number
           id?: string
@@ -119,14 +181,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      owns_business: { Args: { _business_id: string }; Returns: boolean }
     }
     Enums: {
       attendance_status: "present" | "absent" | "half_day"
