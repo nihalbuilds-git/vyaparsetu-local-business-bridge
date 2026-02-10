@@ -2,54 +2,53 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CalendarCheck, IndianRupee, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Megaphone, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ workers: 0, presentToday: 0, totalSalary: 0 });
+  const [shopName, setShopName] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
-      const { data: workers } = await supabase.from("workers").select("id, daily_salary").eq("user_id", user.id);
-      const today = new Date().toISOString().split("T")[0];
-      const { data: attendance } = await supabase.from("attendance").select("id").eq("user_id", user.id).eq("date", today).eq("status", "present");
-      const totalSalary = (workers || []).reduce((sum, w) => sum + Number(w.daily_salary), 0);
-      setStats({
-        workers: workers?.length || 0,
-        presentToday: attendance?.length || 0,
-        totalSalary: totalSalary * 30,
-      });
-    };
-    load();
+    supabase.from("businesses").select("name").eq("owner_id", user.id).maybeSingle().then(({ data }) => {
+      if (data?.name) setShopName(data.name);
+    });
   }, [user]);
 
-  const cards = [
-    { title: "Total Workers", value: stats.workers, icon: Users, color: "text-primary" },
-    { title: "Present Today", value: stats.presentToday, icon: CalendarCheck, color: "text-success" },
-    { title: "Monthly Salary (est)", value: `₹${stats.totalSalary.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-warning" },
-    { title: "Attendance Rate", value: stats.workers > 0 ? `${Math.round((stats.presentToday / stats.workers) * 100)}%` : "—", icon: TrendingUp, color: "text-accent-foreground" },
-  ];
+  const today = new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <AppLayout>
       <div className="animate-fade-in">
-        <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">Dashboard</h1>
-        <p className="text-muted-foreground mb-6">Welcome back! Here's your business overview.</p>
+        <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">
+          {shopName ? shopName : "Welcome"}
+        </h1>
+        <p className="text-muted-foreground mb-8">{today}</p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map(({ title, value, icon: Icon, color }) => (
-            <Card key={title} className="border-border/50 hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-                <Icon className={color} size={20} />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold font-display">{value}</p>
+        <div className="grid gap-6 sm:grid-cols-2 max-w-xl">
+          <Link to="/campaign">
+            <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
+                <Megaphone className="text-primary" size={36} />
+                <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Create AI Campaign</span>
               </CardContent>
             </Card>
-          ))}
+          </Link>
+          <Link to="/workers">
+            <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
+                <Users className="text-primary" size={36} />
+                <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Workers & Attendance</span>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
     </AppLayout>
