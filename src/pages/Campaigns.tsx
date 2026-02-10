@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Copy } from "lucide-react";
 
-const campaignTypes = ["Diwali Sale", "Weekend Offer", "New Arrival", "Clearance Sale", "Festival Special", "Grand Opening"];
+const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
 
 export default function Campaigns() {
   const { user } = useAuth();
@@ -45,7 +45,16 @@ export default function Campaigns() {
         body: { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text },
       });
       if (resp.error) throw resp.error;
-      setResult({ message: resp.data?.message || "", image_prompt: resp.data?.image_prompt || "" });
+      const message = resp.data?.message || "";
+      const image_prompt = resp.data?.image_prompt || "";
+      setResult({ message, image_prompt });
+
+      // Save to campaigns table
+      await supabase.from("campaigns").insert({
+        business_id: businessId,
+        message,
+        poster_url: null,
+      });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to generate", variant: "destructive" });
     } finally {
@@ -99,6 +108,14 @@ export default function Campaigns() {
                   <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy</Button>
                 </div>
                 <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.image_prompt}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold font-display mb-3">Poster Preview</h3>
+                <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
+                  <p className="text-muted-foreground text-sm">🖼️ AI poster image will appear here</p>
+                </div>
               </CardContent>
             </Card>
           </div>
