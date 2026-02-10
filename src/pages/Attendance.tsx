@@ -77,9 +77,22 @@ export default function Attendance() {
             <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance</h1>
             <p className="text-muted-foreground">{new Date(date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
           </div>
-          <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
-            {saving ? "Saving..." : "Save"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const all: Record<string, Status> = {};
+                workers.forEach((w) => (all[w.id] = "present"));
+                setAttendance(all);
+              }}
+              disabled={workers.length === 0}
+            >
+              Mark All Present
+            </Button>
+            <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
 
         {workers.length === 0 ? (
