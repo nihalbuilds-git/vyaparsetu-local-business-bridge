@@ -23,12 +23,15 @@ export default function Workers() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [businessId, setBusinessId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", role: "", daily_salary: "" });
 
   const load = async () => {
     if (!user) return;
+    const { data: biz } = await supabase.from("businesses").select("id").eq("owner_id", user.id).maybeSingle();
+    if (biz) setBusinessId(biz.id);
     const { data } = await supabase.from("workers").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     setWorkers((data as Worker[]) || []);
   };
@@ -37,18 +40,19 @@ export default function Workers() {
 
   const handleSave = async () => {
     if (!form.name || !user) return;
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: form.name,
       phone: form.phone || null,
       role: form.role || null,
       daily_salary: Number(form.daily_salary) || 0,
       user_id: user.id,
     };
+    if (businessId) payload.business_id = businessId;
     if (editId) {
-      const { error } = await supabase.from("workers").update(payload).eq("id", editId);
+      const { error } = await supabase.from("workers").update(payload as any).eq("id", editId);
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     } else {
-      const { error } = await supabase.from("workers").insert(payload);
+      const { error } = await supabase.from("workers").insert(payload as any);
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     }
     toast({ title: editId ? "Worker updated" : "Worker added" });
