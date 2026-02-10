@@ -28,7 +28,9 @@ export default function Salary() {
     const load = async () => {
       const { data: workers } = await supabase.from("workers").select("*").eq("user_id", user.id);
       const startDate = `${month}-01`;
-      const endDate = `${month}-31`;
+      const [y, m] = month.split("-").map(Number);
+      const lastDay = new Date(y, m, 0).getDate();
+      const endDate = `${month}-${String(lastDay).padStart(2, "0")}`;
       const { data: att } = await supabase.from("attendance").select("worker_id, status").eq("user_id", user.id).gte("date", startDate).lte("date", endDate);
 
       const result = (workers || []).map((w: any) => {
