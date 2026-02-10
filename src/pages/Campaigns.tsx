@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,29 +11,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Copy } from "lucide-react";
 
-const platforms = ["WhatsApp", "Instagram", "Facebook", "SMS", "Poster/Pamphlet"];
-const languages = ["Hindi", "English", "Hinglish"];
+const campaignTypes = ["Diwali Sale", "Weekend Offer", "New Arrival", "Clearance Sale", "Festival Special", "Grand Opening"];
 
 export default function Campaigns() {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [form, setForm] = useState({ businessName: "", offer: "", platform: "WhatsApp", language: "Hinglish" });
-  const [result, setResult] = useState("");
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [form, setForm] = useState({ campaign_type: "Weekend Offer", offer_text: "" });
+  const [result, setResult] = useState<{ message: string; image_prompt: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("businesses").select("id").eq("owner_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) setBusinessId(data.id);
+    });
+  }, [user]);
+
   const generate = async () => {
-    if (!form.businessName || !form.offer) {
-      toast({ title: "Please fill business name and offer", variant: "destructive" });
+    if (!form.offer_text) {
+      toast({ title: "Please enter an offer", variant: "destructive" });
+      return;
+    }
+    if (!businessId) {
+      toast({ title: "Please set up your business profile first", variant: "destructive" });
       return;
     }
     setLoading(true);
-    setResult("");
+    setResult(null);
 
     try {
       const resp = await supabase.functions.invoke("generate-campaign", {
-        body: { businessName: form.businessName, offer: form.offer, platform: form.platform, language: form.language },
+        body: { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text },
       });
       if (resp.error) throw resp.error;
-      setResult(resp.data?.campaign || "No campaign generated.");
+      setResult({ message: resp.data?.message || "", image_prompt: resp.data?.image_prompt || "" });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to generate", variant: "destructive" });
     } finally {
@@ -40,8 +53,8 @@ export default function Campaigns() {
     }
   };
 
-  const copy = () => {
-    navigator.clipboard.writeText(result);
+  const copy = (text: string) => {
+    navigator.clipboard.writeText(text);
     toast({ title: "Copied to clipboard!" });
   };
 
@@ -53,40 +66,42 @@ export default function Campaigns() {
 
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4">
-            <div><Label>Business Name</Label><Input value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} placeholder="e.g. Sharma General Store" /></div>
-            <div><Label>Offer / Promotion</Label><Textarea value={form.offer} onChange={(e) => setForm({ ...form, offer: e.target.value })} placeholder="e.g. 20% off on all groceries this weekend" rows={3} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Platform</Label>
-                <Select value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{platforms.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Language</Label>
-                <Select value={form.language} onValueChange={(v) => setForm({ ...form, language: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Campaign Type</Label>
+              <Select value={form.campaign_type} onValueChange={(v) => setForm({ ...form, campaign_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{campaignTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
-            <Button onClick={generate} disabled={loading} className="w-full gradient-primary text-primary-foreground gap-2">
+            <div><Label>Offer / Promotion</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder="e.g. 20% off on all groceries this weekend" rows={3} /></div>
+            <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
               <Sparkles size={16} />{loading ? "Generating..." : "Generate Campaign"}
             </Button>
+            {!businessId && <p className="text-xs text-destructive">Set up your business profile first to generate campaigns.</p>}
           </CardContent>
         </Card>
 
         {result && (
-          <Card className="animate-fade-in">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold font-display">Generated Campaign</h3>
-                <Button variant="ghost" size="sm" onClick={copy} className="gap-1"><Copy size={14} /> Copy</Button>
-              </div>
-              <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result}</div>
-            </CardContent>
-          </Card>
+          <div className="space-y-4 animate-fade-in">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold font-display">Marketing Message</h3>
+                  <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> Copy</Button>
+                </div>
+                <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold font-display">Image Prompt</h3>
+                  <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy</Button>
+                </div>
+                <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.image_prompt}</div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </AppLayout>
