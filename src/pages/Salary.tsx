@@ -47,18 +47,22 @@ export default function Salary() {
 
   const grandTotal = data.reduce((s, w) => s + w.totalSalary, 0);
 
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(2026, i, 1);
-    return { value: `2026-${String(i + 1).padStart(2, "0")}`, label: d.toLocaleDateString("en-IN", { month: "long", year: "numeric" }) };
-  });
+  const currentYear = new Date().getFullYear();
+  const months = [];
+  for (let y = currentYear - 1; y <= currentYear + 1; y++) {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(y, i, 1);
+      months.push({ value: `${y}-${String(i + 1).padStart(2, "0")}`, label: d.toLocaleDateString("hi-IN", { month: "long", year: "numeric" }) });
+    }
+  }
 
   return (
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Salary</h1>
-            <p className="text-muted-foreground">Monthly salary calculation</p>
+           <h1 className="text-2xl md:text-3xl font-bold font-display">Salary (वेतन)</h1>
+            <p className="text-muted-foreground">Mahine ka hisaab-kitaab</p>
           </div>
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>

@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2 } from "lucide-react";
 
@@ -27,6 +31,7 @@ export default function Workers() {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", role: "", daily_salary: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const load = async () => {
     if (!user) return;
@@ -38,12 +43,21 @@ export default function Workers() {
 
   useEffect(() => { load(); }, [user]);
 
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!form.name.trim()) e.name = "Naam zaruri hai";
+    if (form.daily_salary && (isNaN(Number(form.daily_salary)) || Number(form.daily_salary) < 0)) e.daily_salary = "Sahi salary daalein";
+    if (form.phone && !/^\d{10}$/.test(form.phone.replace(/\s/g, ""))) e.phone = "10 digit phone number daalein";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!form.name || !user) return;
+    if (!validate() || !user) return;
     const payload: Record<string, unknown> = {
-      name: form.name,
-      phone: form.phone || null,
-      role: form.role || null,
+      name: form.name.trim(),
+      phone: form.phone.trim() || null,
+      role: form.role.trim() || null,
       daily_salary: Number(form.daily_salary) || 0,
       user_id: user.id,
     };
@@ -59,17 +73,20 @@ export default function Workers() {
     setOpen(false);
     setEditId(null);
     setForm({ name: "", phone: "", role: "", daily_salary: "" });
+    setErrors({});
     load();
   };
 
   const handleEdit = (w: Worker) => {
     setEditId(w.id);
     setForm({ name: w.name, phone: w.phone || "", role: w.role || "", daily_salary: String(w.daily_salary) });
+    setErrors({});
     setOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("workers").delete().eq("id", id);
+    const { error } = await supabase.from("workers").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Worker removed" });
     load();
   };
@@ -79,28 +96,40 @@ export default function Workers() {
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Workers</h1>
-            <p className="text-muted-foreground">Manage your team</p>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">Workers (कर्मचारी)</h1>
+            <p className="text-muted-foreground">Apni team manage karein</p>
           </div>
-          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ name: "", phone: "", role: "", daily_salary: "" }); } }}>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ name: "", phone: "", role: "", daily_salary: "" }); setErrors({}); } }}>
             <DialogTrigger asChild>
-              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Add Worker</Button>
+              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Worker Jodein</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Add"} Worker</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Naya"} Worker</DialogTitle></DialogHeader>
               <div className="space-y-4">
-                <div><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker name" /></div>
-                <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone number" /></div>
-                <div><Label>Role</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Helper, Driver" /></div>
-                <div><Label>Daily Salary (₹)</Label><Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" /></div>
-                <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">Save</Button>
+                <div>
+                  <Label>Naam (Name) *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker ka naam" />
+                  {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit number" />
+                  {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
+                </div>
+                <div><Label>Role (भूमिका)</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Helper, Driver" /></div>
+                <div>
+                  <Label>Daily Salary / रोज़ाना वेतन (₹)</Label>
+                  <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
+                  {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
+                </div>
+                <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">Save करें</Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
         {workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><Users size={40} className="mb-3 opacity-40" /><p>No workers added yet</p></CardContent></Card>
+          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>Abhi tak koi worker nahi joda</p></CardContent></Card>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {workers.map((w) => (
@@ -114,7 +143,25 @@ export default function Workers() {
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(w)}><Edit2 size={14} /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(w.id)} className="text-destructive"><Trash2 size={14} /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive"><Trash2 size={14} /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Worker Hatayein?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Kya aap "{w.name}" ko delete karna chahte hain? Iske saath uski attendance bhi hat jayegi. Yeh action undo nahi hoga.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Nahi</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Haan, Hatao
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-accent px-3 py-2">
@@ -131,6 +178,6 @@ export default function Workers() {
   );
 }
 
-function Users({ size, className }: { size: number; className?: string }) {
+function UsersIcon({ size, className }: { size: number; className?: string }) {
   return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 }
