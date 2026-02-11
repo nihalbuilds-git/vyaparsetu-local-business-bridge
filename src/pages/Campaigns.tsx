@@ -70,23 +70,23 @@ export default function Campaigns() {
   return (
     <AppLayout>
       <div className="animate-fade-in max-w-2xl">
-        <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">AI Campaigns</h1>
-        <p className="text-muted-foreground mb-6">Generate marketing messages for your business</p>
+        <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">AI Campaigns 📣</h1>
+        <p className="text-muted-foreground mb-6">Apne business ke liye marketing message banayein</p>
 
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4">
             <div>
-              <Label>Campaign Type</Label>
+              <Label>Campaign Type (प्रकार)</Label>
               <Select value={form.campaign_type} onValueChange={(v) => setForm({ ...form, campaign_type: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{campaignTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Offer / Promotion</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder="e.g. 20% off on all groceries this weekend" rows={3} /></div>
+            <div><Label>Offer / Promotion (ऑफ़र)</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder="e.g. Is weekend sabhi grocery items par 20% off" rows={3} /></div>
             <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
-              <Sparkles size={16} />{loading ? "Generating..." : "Generate Campaign"}
+              <Sparkles size={16} />{loading ? "Banaya jaa raha hai..." : "Campaign Banayein ✨"}
             </Button>
-            {!businessId && <p className="text-xs text-destructive">Set up your business profile first to generate campaigns.</p>}
+            {!businessId && <p className="text-xs text-destructive">Pehle apna business profile set karein.</p>}
           </CardContent>
         </Card>
 
@@ -95,8 +95,8 @@ export default function Campaigns() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold font-display">Marketing Message</h3>
-                  <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> Copy</Button>
+                   <h3 className="font-semibold font-display">Marketing Message (संदेश)</h3>
+                   <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> Copy करें</Button>
                 </div>
                 <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
               </CardContent>
@@ -104,17 +104,17 @@ export default function Campaigns() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold font-display">Image Prompt</h3>
-                  <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy</Button>
+                   <h3 className="font-semibold font-display">Image Prompt (चित्र)</h3>
+                   <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy करें</Button>
                 </div>
                 <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.image_prompt}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold font-display mb-3">Poster Preview</h3>
+                <h3 className="font-semibold font-display mb-3">Poster Preview (पोस्टर)</h3>
                 <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
-                  <p className="text-muted-foreground text-sm">🖼️ AI poster image will appear here</p>
+                  <p className="text-muted-foreground text-sm">🖼️ AI poster yahan dikhega</p>
                 </div>
               </CardContent>
             </Card>
