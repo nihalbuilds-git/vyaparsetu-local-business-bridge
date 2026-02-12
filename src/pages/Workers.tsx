@@ -95,42 +95,42 @@ export default function Workers() {
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Workers (कर्मचारी)</h1>
-            <p className="text-muted-foreground">Apni team manage karein</p>
-          </div>
+           <div>
+             <h1 className="text-2xl md:text-3xl font-bold font-display">Workers</h1>
+             <p className="text-muted-foreground">Manage your team</p>
+           </div>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ name: "", phone: "", role: "", daily_salary: "" }); setErrors({}); } }}>
             <DialogTrigger asChild>
-              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Worker Jodein</Button>
+              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Add Worker</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Naya"} Worker</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Add"} Worker</DialogTitle></DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <Label>Naam (Name) *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker ka naam" />
-                  {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit number" />
-                  {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
-                </div>
-                <div><Label>Role (भूमिका)</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Helper, Driver" /></div>
-                <div>
-                  <Label>Daily Salary / रोज़ाना वेतन (₹)</Label>
-                  <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
-                  {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
-                </div>
-                <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">Save करें</Button>
+               <div>
+                   <Label>Name *</Label>
+                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker's name" />
+                   {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+                 </div>
+                 <div>
+                   <Label>Phone</Label>
+                   <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit number" />
+                   {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
+                 </div>
+                 <div><Label>Role</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Helper, Driver" /></div>
+                 <div>
+                   <Label>Daily Salary (₹)</Label>
+                   <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
+                   {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
+                 </div>
+                 <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">Save</Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        {workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>Abhi tak koi worker nahi joda</p></CardContent></Card>
-        ) : (
+         {workers.length === 0 ? (
+           <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>No workers added yet</p></CardContent></Card>
+         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {workers.map((w) => (
               <Card key={w.id} className="hover:shadow-md transition-shadow">
@@ -147,20 +147,20 @@ export default function Workers() {
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="icon" className="text-destructive"><Trash2 size={14} /></Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Worker Hatayein?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Kya aap "{w.name}" ko delete karna chahte hain? Iske saath uski attendance bhi hat jayegi. Yeh action undo nahi hoga.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Nahi</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Haan, Hatao
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
+                         <AlertDialogContent>
+                           <AlertDialogHeader>
+                             <AlertDialogTitle>Remove Worker?</AlertDialogTitle>
+                             <AlertDialogDescription>
+                               Are you sure you want to delete "{w.name}"? This will also remove their attendance records. This action cannot be undone.
+                             </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                             <AlertDialogCancel>Cancel</AlertDialogCancel>
+                             <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                               Delete
+                             </AlertDialogAction>
+                           </AlertDialogFooter>
+                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
                   </div>

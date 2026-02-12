@@ -52,7 +52,7 @@ export default function Salary() {
   for (let y = currentYear - 1; y <= currentYear + 1; y++) {
     for (let i = 0; i < 12; i++) {
       const d = new Date(y, i, 1);
-      months.push({ value: `${y}-${String(i + 1).padStart(2, "0")}`, label: d.toLocaleDateString("hi-IN", { month: "long", year: "numeric" }) });
+      months.push({ value: `${y}-${String(i + 1).padStart(2, "0")}`, label: d.toLocaleDateString("en-IN", { month: "long", year: "numeric" }) });
     }
   }
 
@@ -60,10 +60,10 @@ export default function Salary() {
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
-          <div>
-           <h1 className="text-2xl md:text-3xl font-bold font-display">Salary (वेतन)</h1>
-            <p className="text-muted-foreground">Mahine ka hisaab-kitaab</p>
-          </div>
+         <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">Salary</h1>
+             <p className="text-muted-foreground">Monthly salary breakdown</p>
+           </div>
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -82,9 +82,9 @@ export default function Salary() {
           </CardContent>
         </Card>
 
-        {data.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">No workers to calculate salary for</CardContent></Card>
-        ) : (
+         {data.length === 0 ? (
+           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers to calculate salaries</CardContent></Card>
+         ) : (
           <div className="space-y-3">
             {data.map((w) => (
               <Card key={w.id} className="hover:shadow-md transition-shadow">

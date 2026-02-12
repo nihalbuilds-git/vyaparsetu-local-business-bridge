@@ -33,22 +33,22 @@ export default function Dashboard() {
         <p className="text-muted-foreground mb-8">{today}</p>
 
         <div className="grid gap-6 sm:grid-cols-2 max-w-xl">
-          <Link to="/campaign">
-            <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
-              <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
-                <Megaphone className="text-primary" size={36} />
-                <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Create AI Campaign</span>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/workers">
-            <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
-              <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
-                <Users className="text-primary" size={36} />
-                <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Workers & Attendance</span>
-              </CardContent>
-            </Card>
-          </Link>
+           <Link to="/campaign">
+             <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
+               <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
+                 <Megaphone className="text-primary" size={36} />
+                 <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">AI Campaigns</span>
+               </CardContent>
+             </Card>
+           </Link>
+           <Link to="/workers">
+             <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
+               <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
+                 <Users className="text-primary" size={36} />
+                 <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Workers</span>
+               </CardContent>
+             </Card>
+           </Link>
         </div>
       </div>
     </AppLayout>

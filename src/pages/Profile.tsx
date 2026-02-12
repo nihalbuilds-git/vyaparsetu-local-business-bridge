@@ -29,13 +29,13 @@ export default function Profile() {
     });
   }, [user]);
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Dukaan ka naam zaruri hai";
-    if (!form.category) e.category = "Category chunein";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+   const validate = () => {
+     const e: Record<string, string> = {};
+     if (!form.name.trim()) e.name = "Shop name is required";
+     if (!form.category) e.category = "Please select a category";
+     setErrors(e);
+     return Object.keys(e).length === 0;
+   };
 
   const save = async () => {
     if (!validate() || !user) return;
@@ -49,40 +49,40 @@ export default function Profile() {
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setSaving(false); return; }
       if (data) setExistingId(data.id);
     }
-    toast({ title: "Profile save ho gaya!" });
+    toast({ title: "Profile saved successfully!" });
     setSaving(false);
   };
 
   return (
     <AppLayout>
-      <div className="animate-fade-in max-w-lg">
-        <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">Business Profile (दुकान)</h1>
-        <p className="text-muted-foreground mb-6">Apni dukaan ki details bharein</p>
+       <div className="animate-fade-in max-w-lg">
+         <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">Business Profile</h1>
+         <p className="text-muted-foreground mb-6">Enter your shop details</p>
 
         <Card>
           <CardContent className="p-6 space-y-4">
-            <div>
-              <Label>Dukaan ka Naam (Shop Name) *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Meri Dukaan" />
-              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
-            </div>
-            <div>
-              <Label>Pata (Address)</Label>
-              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Dukaan ka pata" />
-            </div>
-            <div>
-              <Label>Category (श्रेणी) *</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                <SelectTrigger><SelectValue placeholder="Category chunein" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
-            </div>
-            <Button onClick={save} disabled={saving} className="w-full gradient-primary text-primary-foreground">
-              {saving ? "Save ho raha hai..." : "Save करें"}
-            </Button>
+             <div>
+               <Label>Shop Name *</Label>
+               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="My Shop" />
+               {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+             </div>
+             <div>
+               <Label>Address</Label>
+               <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Shop location" />
+             </div>
+             <div>
+               <Label>Category *</Label>
+               <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                 <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                 <SelectContent>
+                   {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                 </SelectContent>
+               </Select>
+               {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
+             </div>
+             <Button onClick={save} disabled={saving} className="w-full gradient-primary text-primary-foreground">
+               {saving ? "Saving..." : "Save"}
+             </Button>
           </CardContent>
         </Card>
       </div>

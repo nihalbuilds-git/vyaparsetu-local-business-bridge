@@ -66,35 +66,35 @@ export default function Attendance() {
         await supabase.from("attendance").insert({ worker_id, status, date, user_id: user.id });
       }
     }
-    toast({ title: "Attendance save ho gayi!" });
+    toast({ title: "Attendance saved successfully!" });
     setSaving(false);
   };
 
-  const statusConfig: Record<Status, { icon: typeof Check; label: string; className: string }> = {
-    present: { icon: Check, label: "Present (उपस्थित)", className: "bg-success text-success-foreground" },
-    absent: { icon: X, label: "Absent (अनुपस्थित)", className: "bg-destructive text-destructive-foreground" },
-    half_day: { icon: Clock, label: "Half Day (आधा दिन)", className: "bg-warning text-warning-foreground" },
-  };
+   const statusConfig: Record<Status, { icon: typeof Check; label: string; className: string }> = {
+     present: { icon: Check, label: "Present", className: "bg-success text-success-foreground" },
+     absent: { icon: X, label: "Absent", className: "bg-destructive text-destructive-foreground" },
+     half_day: { icon: Clock, label: "Half Day", className: "bg-warning text-warning-foreground" },
+   };
 
   return (
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance (हाज़िरी)</h1>
-            <p className="text-muted-foreground">
-              {selectedDate.toLocaleDateString("hi-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-              {isToday && " — Aaj"}
-            </p>
-          </div>
+           <div>
+             <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance</h1>
+             <p className="text-muted-foreground">
+               {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+               {isToday && " — Today"}
+             </p>
+           </div>
           <div className="flex gap-2 flex-wrap">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
-                  <CalendarIcon size={16} />
-                  {isToday ? "Aaj" : format(selectedDate, "dd MMM yyyy")}
-                </Button>
-              </PopoverTrigger>
+             <Popover>
+               <PopoverTrigger asChild>
+                 <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
+                   <CalendarIcon size={16} />
+                   {isToday ? "Today" : format(selectedDate, "dd MMM yyyy")}
+                 </Button>
+               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
                   mode="single"
@@ -106,26 +106,26 @@ export default function Attendance() {
                 />
               </PopoverContent>
             </Popover>
-            <Button
-              variant="outline"
-              onClick={() => {
-                const all: Record<string, Status> = {};
-                workers.forEach((w) => (all[w.id] = "present"));
-                setAttendance(all);
-              }}
-              disabled={workers.length === 0}
-            >
-              Sabko Present Karein
-            </Button>
-            <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
-              {saving ? "Save ho raha hai..." : "Save करें"}
-            </Button>
+             <Button
+               variant="outline"
+               onClick={() => {
+                 const all: Record<string, Status> = {};
+                 workers.forEach((w) => (all[w.id] = "present"));
+                 setAttendance(all);
+               }}
+               disabled={workers.length === 0}
+             >
+               Mark All Present
+             </Button>
+             <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
+               {saving ? "Saving..." : "Save"}
+             </Button>
           </div>
         </div>
 
-        {workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Pehle workers jodein attendance mark karne ke liye</CardContent></Card>
-        ) : (
+         {workers.length === 0 ? (
+           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers first to mark attendance</CardContent></Card>
+         ) : (
           <div className="space-y-3">
             {workers.map((w) => {
               const status = attendance[w.id];
@@ -141,9 +141,9 @@ export default function Attendance() {
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}>
                         <config.icon size={12} /> {config.label}
                       </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Tap karein</span>
-                    )}
+                     ) : (
+                       <span className="text-xs text-muted-foreground">Tap to set</span>
+                     )}
                   </CardContent>
                 </Card>
               );
