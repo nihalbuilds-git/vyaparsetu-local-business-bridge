@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface WorkerSalary {
@@ -18,6 +19,7 @@ interface WorkerSalary {
 export default function Salary() {
   const { user } = useAuth();
   const [data, setData] = useState<WorkerSalary[]>([]);
+  const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -26,6 +28,7 @@ export default function Salary() {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
+      setLoading(true);
       const { data: workers } = await supabase.from("workers").select("*").eq("user_id", user.id);
       const startDate = `${month}-01`;
       const [y, m] = month.split("-").map(Number);
@@ -41,6 +44,7 @@ export default function Salary() {
         return { id: w.id, name: w.name, role: w.role, daily_salary: Number(w.daily_salary), presentDays, halfDays, totalSalary };
       });
       setData(result);
+      setLoading(false);
     };
     load();
   }, [user, month]);
@@ -60,10 +64,10 @@ export default function Salary() {
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
-         <div>
+          <div>
             <h1 className="text-2xl md:text-3xl font-bold font-display">Salary</h1>
-             <p className="text-muted-foreground">Monthly salary breakdown</p>
-           </div>
+            <p className="text-muted-foreground">Monthly salary breakdown</p>
+          </div>
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -72,48 +76,74 @@ export default function Salary() {
           </Select>
         </div>
 
-        <Card className="mb-4 gradient-primary">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm text-primary-foreground/80">Total Payable</p>
-              <p className="text-3xl font-bold font-display text-primary-foreground">₹{grandTotal.toLocaleString("en-IN")}</p>
-            </div>
-            <p className="text-sm text-primary-foreground/80">{data.length} workers</p>
-          </CardContent>
-        </Card>
-
-         {data.length === 0 ? (
-           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers to calculate salaries</CardContent></Card>
-         ) : (
-          <div className="space-y-3">
-            {data.map((w) => (
-              <Card key={w.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold font-display">{w.name}</h3>
-                      <p className="text-sm text-muted-foreground">{w.role || "Worker"}</p>
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex justify-between">
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-28" />
+                      <Skeleton className="h-4 w-20" />
                     </div>
-                    <p className="text-lg font-bold font-display text-primary">₹{w.totalSalary.toLocaleString("en-IN")}</p>
+                    <Skeleton className="h-6 w-20" />
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-lg bg-accent p-2">
-                      <p className="text-muted-foreground">Present</p>
-                      <p className="font-semibold text-accent-foreground">{w.presentDays} days</p>
-                    </div>
-                    <div className="rounded-lg bg-accent p-2">
-                      <p className="text-muted-foreground">Half Day</p>
-                      <p className="font-semibold text-accent-foreground">{w.halfDays} days</p>
-                    </div>
-                    <div className="rounded-lg bg-accent p-2">
-                      <p className="text-muted-foreground">Daily Rate</p>
-                      <p className="font-semibold text-accent-foreground">₹{w.daily_salary}</p>
-                    </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Skeleton className="h-14 rounded-lg" />
+                    <Skeleton className="h-14 rounded-lg" />
+                    <Skeleton className="h-14 rounded-lg" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+        ) : (
+          <>
+            <Card className="mb-4 gradient-primary">
+              <CardContent className="flex items-center justify-between p-6">
+                <div>
+                  <p className="text-sm text-primary-foreground/80">Total Payable</p>
+                  <p className="text-3xl font-bold font-display text-primary-foreground">₹{grandTotal.toLocaleString("en-IN")}</p>
+                </div>
+                <p className="text-sm text-primary-foreground/80">{data.length} workers</p>
+              </CardContent>
+            </Card>
+
+            {data.length === 0 ? (
+              <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers to calculate salaries</CardContent></Card>
+            ) : (
+              <div className="space-y-3">
+                {data.map((w) => (
+                  <Card key={w.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold font-display">{w.name}</h3>
+                          <p className="text-sm text-muted-foreground">{w.role || "Worker"}</p>
+                        </div>
+                        <p className="text-lg font-bold font-display text-primary">₹{w.totalSalary.toLocaleString("en-IN")}</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="rounded-lg bg-accent p-2">
+                          <p className="text-muted-foreground">Present</p>
+                          <p className="font-semibold text-accent-foreground">{w.presentDays} days</p>
+                        </div>
+                        <div className="rounded-lg bg-accent p-2">
+                          <p className="text-muted-foreground">Half Day</p>
+                          <p className="font-semibold text-accent-foreground">{w.halfDays} days</p>
+                        </div>
+                        <div className="rounded-lg bg-accent p-2">
+                          <p className="text-muted-foreground">Daily Rate</p>
+                          <p className="font-semibold text-accent-foreground">₹{w.daily_salary}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </AppLayout>

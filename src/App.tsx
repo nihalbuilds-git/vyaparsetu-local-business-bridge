@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Workers from "./pages/Workers";
 import Attendance from "./pages/Attendance";
 import Salary from "./pages/Salary";
 import Campaigns from "./pages/Campaigns";
+import CampaignHistory from "./pages/CampaignHistory";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -33,12 +35,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/workers" element={<ProtectedRoute><Workers /></ProtectedRoute>} />
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
             <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
             <Route path="/campaign" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+            <Route path="/campaign-history" element={<ProtectedRoute><CampaignHistory /></ProtectedRoute>} />
             <Route path="/campaigns" element={<Navigate to="/campaign" replace />} />
             <Route path="/business-profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/profile" element={<Navigate to="/business-profile" replace />} />

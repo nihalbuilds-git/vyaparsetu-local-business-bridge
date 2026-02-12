@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ export default function Attendance() {
   const [attendance, setAttendance] = useState<Record<string, Status>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const date = format(selectedDate, "yyyy-MM-dd");
   const isToday = date === format(new Date(), "yyyy-MM-dd");
@@ -38,12 +40,14 @@ export default function Attendance() {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
+      setLoading(true);
       const { data: w } = await supabase.from("workers").select("id, name, role").eq("user_id", user.id);
       setWorkers((w as Worker[]) || []);
       const { data: a } = await supabase.from("attendance").select("worker_id, status").eq("user_id", user.id).eq("date", date);
       const map: Record<string, Status> = {};
       (a as AttendanceRecord[] || []).forEach((r) => (map[r.worker_id] = r.status));
       setAttendance(map);
+      setLoading(false);
     };
     load();
   }, [user, date]);
@@ -70,31 +74,31 @@ export default function Attendance() {
     setSaving(false);
   };
 
-   const statusConfig: Record<Status, { icon: typeof Check; label: string; className: string }> = {
-     present: { icon: Check, label: "Present", className: "bg-success text-success-foreground" },
-     absent: { icon: X, label: "Absent", className: "bg-destructive text-destructive-foreground" },
-     half_day: { icon: Clock, label: "Half Day", className: "bg-warning text-warning-foreground" },
-   };
+  const statusConfig: Record<Status, { icon: typeof Check; label: string; className: string }> = {
+    present: { icon: Check, label: "Present", className: "bg-success text-success-foreground" },
+    absent: { icon: X, label: "Absent", className: "bg-destructive text-destructive-foreground" },
+    half_day: { icon: Clock, label: "Half Day", className: "bg-warning text-warning-foreground" },
+  };
 
   return (
     <AppLayout>
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-           <div>
-             <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance</h1>
-             <p className="text-muted-foreground">
-               {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-               {isToday && " — Today"}
-             </p>
-           </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance</h1>
+            <p className="text-muted-foreground">
+              {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {isToday && " — Today"}
+            </p>
+          </div>
           <div className="flex gap-2 flex-wrap">
-             <Popover>
-               <PopoverTrigger asChild>
-                 <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
-                   <CalendarIcon size={16} />
-                   {isToday ? "Today" : format(selectedDate, "dd MMM yyyy")}
-                 </Button>
-               </PopoverTrigger>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
+                  <CalendarIcon size={16} />
+                  {isToday ? "Today" : format(selectedDate, "dd MMM yyyy")}
+                </Button>
+              </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
                   mode="single"
@@ -106,26 +110,40 @@ export default function Attendance() {
                 />
               </PopoverContent>
             </Popover>
-             <Button
-               variant="outline"
-               onClick={() => {
-                 const all: Record<string, Status> = {};
-                 workers.forEach((w) => (all[w.id] = "present"));
-                 setAttendance(all);
-               }}
-               disabled={workers.length === 0}
-             >
-               Mark All Present
-             </Button>
-             <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
-               {saving ? "Saving..." : "Save"}
-             </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const all: Record<string, Status> = {};
+                workers.forEach((w) => (all[w.id] = "present"));
+                setAttendance(all);
+              }}
+              disabled={workers.length === 0}
+            >
+              Mark All Present
+            </Button>
+            <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
+              {saving ? "Saving..." : "Save"}
+            </Button>
           </div>
         </div>
 
-         {workers.length === 0 ? (
-           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers first to mark attendance</CardContent></Card>
-         ) : (
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-7 w-20 rounded-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : workers.length === 0 ? (
+          <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers first to mark attendance</CardContent></Card>
+        ) : (
           <div className="space-y-3">
             {workers.map((w) => {
               const status = attendance[w.id];
@@ -141,9 +159,9 @@ export default function Attendance() {
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}>
                         <config.icon size={12} /> {config.label}
                       </span>
-                     ) : (
-                       <span className="text-xs text-muted-foreground">Tap to set</span>
-                     )}
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Tap to set</span>
+                    )}
                   </CardContent>
                 </Card>
               );
