@@ -4,10 +4,10 @@ import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Copy } from "lucide-react";
 
@@ -20,11 +20,13 @@ export default function Campaigns() {
   const [form, setForm] = useState({ campaign_type: "Weekend Offer", offer_text: "" });
   const [result, setResult] = useState<{ message: string; image_prompt: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("businesses").select("id").eq("owner_id", user.id).maybeSingle().then(({ data }) => {
       if (data) setBusinessId(data.id);
+      setPageLoading(false);
     });
   }, [user]);
 
@@ -49,7 +51,6 @@ export default function Campaigns() {
       const image_prompt = resp.data?.image_prompt || "";
       setResult({ message, image_prompt });
 
-      // Save to campaigns table
       await supabase.from("campaigns").insert({
         business_id: businessId,
         message,
@@ -73,52 +74,64 @@ export default function Campaigns() {
         <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">AI Campaigns 📣</h1>
         <p className="text-muted-foreground mb-6">Generate marketing messages for your business</p>
 
-        <Card className="mb-6">
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <Label>Campaign Type</Label>
-              <Select value={form.campaign_type} onValueChange={(v) => setForm({ ...form, campaign_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{campaignTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label>Offer / Promotion</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder="e.g. 20% off on all grocery items this weekend" rows={3} /></div>
-            <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
-              <Sparkles size={16} />{loading ? "Generating..." : "Generate Campaign ✨"}
-            </Button>
-            {!businessId && <p className="text-xs text-destructive">Please set up your business profile first.</p>}
-          </CardContent>
-        </Card>
+        {pageLoading ? (
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Card className="mb-6">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <Label>Campaign Type</Label>
+                  <Select value={form.campaign_type} onValueChange={(v) => setForm({ ...form, campaign_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{campaignTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Offer / Promotion</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder="e.g. 20% off on all grocery items this weekend" rows={3} /></div>
+                <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
+                  <Sparkles size={16} />{loading ? "Generating..." : "Generate Campaign ✨"}
+                </Button>
+                {!businessId && <p className="text-xs text-destructive">Please set up your business profile first.</p>}
+              </CardContent>
+            </Card>
 
-        {result && (
-          <div className="space-y-4 animate-fade-in">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                   <h3 className="font-semibold font-display">Marketing Message</h3>
-                   <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> Copy</Button>
-                </div>
-                <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                   <h3 className="font-semibold font-display">Image Prompt</h3>
-                   <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy</Button>
-                </div>
-                <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.image_prompt}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold font-display mb-3">Poster Preview</h3>
-                <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
-                  <p className="text-muted-foreground text-sm">🖼️ AI-generated poster will appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            {result && (
+              <div className="space-y-4 animate-fade-in">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold font-display">Marketing Message</h3>
+                      <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> Copy</Button>
+                    </div>
+                    <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold font-display">Image Prompt</h3>
+                      <Button variant="ghost" size="sm" onClick={() => copy(result.image_prompt)} className="gap-1"><Copy size={14} /> Copy</Button>
+                    </div>
+                    <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.image_prompt}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold font-display mb-3">Poster Preview</h3>
+                    <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
+                      <p className="text-muted-foreground text-sm">🖼️ AI-generated poster will appear here</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </>
         )}
       </div>
     </AppLayout>
