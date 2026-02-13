@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
@@ -92,6 +93,9 @@ export default function Attendance() {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" asChild className="gap-2">
+              <Link to="/attendance-calendar"><CalendarIcon size={16} /> Calendar View</Link>
+            </Button>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
