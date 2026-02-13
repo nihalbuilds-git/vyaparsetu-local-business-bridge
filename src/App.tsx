@@ -13,6 +13,7 @@ import Attendance from "./pages/Attendance";
 import Salary from "./pages/Salary";
 import Campaigns from "./pages/Campaigns";
 import CampaignHistory from "./pages/CampaignHistory";
+import AttendanceCalendar from "./pages/AttendanceCalendar";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/workers" element={<ProtectedRoute><Workers /></ProtectedRoute>} />
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+            <Route path="/attendance-calendar" element={<ProtectedRoute><AttendanceCalendar /></ProtectedRoute>} />
             <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
             <Route path="/campaign" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
             <Route path="/campaign-history" element={<ProtectedRoute><CampaignHistory /></ProtectedRoute>} />
