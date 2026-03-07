@@ -19,6 +19,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [shopName, setShopName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalWorkers: 0, attendancePercent: 0, monthlySalary: 0, totalCampaigns: 0 });
 
   useEffect(() => {
