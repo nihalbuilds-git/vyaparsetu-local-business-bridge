@@ -68,7 +68,6 @@ export default function Dashboard() {
   useEffect(() => {
     load();
   }, [user]);
-  }, [user]);
 
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
