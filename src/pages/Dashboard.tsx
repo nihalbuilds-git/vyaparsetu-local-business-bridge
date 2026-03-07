@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
+import Onboarding from "@/components/Onboarding";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Megaphone, Users, History, CalendarCheck, IndianRupee, BarChart3 } from "lucide-react";
@@ -18,52 +19,53 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [shopName, setShopName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalWorkers: 0, attendancePercent: 0, monthlySalary: 0, totalCampaigns: 0 });
 
-  useEffect(() => {
+  const load = async () => {
     if (!user) return;
-
-    const load = async () => {
-      // Fetch business info
-      const { data: biz } = await supabase.from("businesses").select("id, name").eq("owner_id", user.id).maybeSingle();
-      if (biz?.name) setShopName(biz.name);
-
-      // Fetch workers
-      const { data: workers } = await supabase.from("workers").select("id, daily_salary").eq("user_id", user.id);
-      const totalWorkers = workers?.length || 0;
-
-      // Today's attendance
-      const todayStr = new Date().toISOString().split("T")[0];
-      const { data: todayAtt } = await supabase.from("attendance").select("status").eq("user_id", user.id).eq("date", todayStr);
-      const presentToday = (todayAtt || []).filter(a => a.status === "present" || a.status === "half_day").length;
-      const attendancePercent = totalWorkers > 0 ? Math.round((presentToday / totalWorkers) * 100) : 0;
-
-      // This month salary
-      const now = new Date();
-      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const monthEnd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
-      const { data: monthAtt } = await supabase.from("attendance").select("worker_id, status").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd);
-
-      let monthlySalary = 0;
-      (workers || []).forEach((w: any) => {
-        const records = (monthAtt || []).filter((a: any) => a.worker_id === w.id);
-        const present = records.filter((a: any) => a.status === "present").length;
-        const half = records.filter((a: any) => a.status === "half_day").length;
-        monthlySalary += (present + half * 0.5) * Number(w.daily_salary);
-      });
-
-      // Campaigns count
-      let totalCampaigns = 0;
-      if (biz?.id) {
-        const { count } = await supabase.from("campaigns").select("id", { count: "exact", head: true }).eq("business_id", biz.id);
-        totalCampaigns = count || 0;
-      }
-
-      setStats({ totalWorkers, attendancePercent, monthlySalary, totalCampaigns });
+    const { data: biz } = await supabase.from("businesses").select("id, name").eq("owner_id", user.id).maybeSingle();
+    if (biz?.name) {
+      setShopName(biz.name);
+    } else {
+      setNeedsOnboarding(true);
       setLoading(false);
-    };
+      return;
+    }
 
+    const { data: workers } = await supabase.from("workers").select("id, daily_salary").eq("user_id", user.id);
+    const totalWorkers = workers?.length || 0;
+
+    const todayStr = new Date().toISOString().split("T")[0];
+    const { data: todayAtt } = await supabase.from("attendance").select("status").eq("user_id", user.id).eq("date", todayStr);
+    const presentToday = (todayAtt || []).filter(a => a.status === "present" || a.status === "half_day").length;
+    const attendancePercent = totalWorkers > 0 ? Math.round((presentToday / totalWorkers) * 100) : 0;
+
+    const now = new Date();
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const monthEnd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+    const { data: monthAtt } = await supabase.from("attendance").select("worker_id, status").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd);
+
+    let monthlySalary = 0;
+    (workers || []).forEach((w: any) => {
+      const records = (monthAtt || []).filter((a: any) => a.worker_id === w.id);
+      const present = records.filter((a: any) => a.status === "present").length;
+      const half = records.filter((a: any) => a.status === "half_day").length;
+      monthlySalary += (present + half * 0.5) * Number(w.daily_salary);
+    });
+
+    let totalCampaigns = 0;
+    if (biz?.id) {
+      const { count } = await supabase.from("campaigns").select("id", { count: "exact", head: true }).eq("business_id", biz.id);
+      totalCampaigns = count || 0;
+    }
+
+    setStats({ totalWorkers, attendancePercent, monthlySalary, totalCampaigns });
+    setLoading(false);
+  };
+
+  useEffect(() => {
     load();
   }, [user]);
 
@@ -80,6 +82,10 @@ export default function Dashboard() {
     { label: "This Month Salary", value: `₹${stats.monthlySalary.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-amber-500" },
     { label: "Total Campaigns", value: String(stats.totalCampaigns), icon: BarChart3, color: "text-violet-500" },
   ];
+
+  if (needsOnboarding) {
+    return <Onboarding onComplete={() => { setNeedsOnboarding(false); setLoading(true); load(); }} />;
+  }
 
   return (
     <AppLayout>

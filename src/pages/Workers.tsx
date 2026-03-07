@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/AppLayout";
@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Camera } from "lucide-react";
 
 interface Worker {
   id: string;
@@ -22,6 +23,7 @@ interface Worker {
   role: string | null;
   daily_salary: number;
   joined_date: string;
+  avatar_url: string | null;
 }
 
 export default function Workers() {
@@ -34,6 +36,10 @@ export default function Workers() {
   const [form, setForm] = useState({ name: "", phone: "", role: "", daily_salary: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     if (!user) return;
@@ -56,8 +62,22 @@ export default function Workers() {
     return Object.keys(e).length === 0;
   };
 
+  const uploadAvatar = async (workerId: string): Promise<string | null> => {
+    if (!avatarFile || !user) return null;
+    const ext = avatarFile.name.split(".").pop();
+    const path = `${user.id}/${workerId}.${ext}`;
+    const { error } = await supabase.storage.from("worker-avatars").upload(path, avatarFile, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("worker-avatars").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
+
   const handleSave = async () => {
     if (!validate() || !user) return;
+    setUploading(true);
     const payload: Record<string, unknown> = {
       name: form.name.trim(),
       phone: form.phone.trim() || null,
@@ -66,24 +86,44 @@ export default function Workers() {
       user_id: user.id,
     };
     if (businessId) payload.business_id = businessId;
+
     if (editId) {
+      if (avatarFile) {
+        const url = await uploadAvatar(editId);
+        if (url) payload.avatar_url = url;
+      }
       const { error } = await supabase.from("workers").update(payload as any).eq("id", editId);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
     } else {
-      const { error } = await supabase.from("workers").insert(payload as any);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      const { data, error } = await supabase.from("workers").insert(payload as any).select("id").single();
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
+      if (data && avatarFile) {
+        const url = await uploadAvatar(data.id);
+        if (url) {
+          await supabase.from("workers").update({ avatar_url: url } as any).eq("id", data.id);
+        }
+      }
     }
     toast({ title: editId ? "Worker updated" : "Worker added" });
+    resetForm();
+    setUploading(false);
+    load();
+  };
+
+  const resetForm = () => {
     setOpen(false);
     setEditId(null);
     setForm({ name: "", phone: "", role: "", daily_salary: "" });
     setErrors({});
-    load();
+    setAvatarFile(null);
+    setAvatarPreview(null);
   };
 
   const handleEdit = (w: Worker) => {
     setEditId(w.id);
     setForm({ name: w.name, phone: w.phone || "", role: w.role || "", daily_salary: String(w.daily_salary) });
+    setAvatarPreview(w.avatar_url || null);
+    setAvatarFile(null);
     setErrors({});
     setOpen(true);
   };
@@ -95,6 +135,19 @@ export default function Workers() {
     load();
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 2MB allowed", variant: "destructive" });
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const getInitials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -103,13 +156,33 @@ export default function Workers() {
             <h1 className="text-2xl md:text-3xl font-bold font-display">Workers</h1>
             <p className="text-muted-foreground">Manage your team</p>
           </div>
-          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ name: "", phone: "", role: "", daily_salary: "" }); setErrors({}); } }}>
+          <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(true); }}>
             <DialogTrigger asChild>
               <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Add Worker</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Add"} Worker</DialogTitle></DialogHeader>
               <div className="space-y-4">
+                {/* Avatar upload */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
+                    <Avatar className="h-20 w-20 border-2 border-border">
+                      {avatarPreview ? (
+                        <AvatarImage src={avatarPreview} alt="Worker photo" />
+                      ) : (
+                        <AvatarFallback className="bg-accent text-accent-foreground text-lg font-display">
+                          {form.name ? getInitials(form.name) : <Camera size={24} />}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute inset-0 rounded-full bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Camera size={20} className="text-background" />
+                    </div>
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                  <p className="text-xs text-muted-foreground">Tap to upload photo</p>
+                </div>
+
                 <div>
                   <Label>Name *</Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker's name" />
@@ -126,7 +199,9 @@ export default function Workers() {
                   <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
                   {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
                 </div>
-                <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">Save</Button>
+                <Button onClick={handleSave} disabled={uploading} className="w-full gradient-primary text-primary-foreground">
+                  {uploading ? "Saving..." : "Save"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -152,10 +227,21 @@ export default function Workers() {
               <Card key={w.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold font-display">{w.name}</h3>
-                      <p className="text-sm text-muted-foreground">{w.role || "No role"}</p>
-                      {w.phone && <p className="text-sm text-muted-foreground">{w.phone}</p>}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-border">
+                        {w.avatar_url ? (
+                          <AvatarImage src={w.avatar_url} alt={w.name} />
+                        ) : (
+                          <AvatarFallback className="bg-accent text-accent-foreground text-xs font-display">
+                            {getInitials(w.name)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold font-display">{w.name}</h3>
+                        <p className="text-sm text-muted-foreground">{w.role || "No role"}</p>
+                        {w.phone && <p className="text-sm text-muted-foreground">{w.phone}</p>}
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(w)}><Edit2 size={14} /></Button>
