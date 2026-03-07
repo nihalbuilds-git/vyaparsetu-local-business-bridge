@@ -89,6 +89,10 @@ export default function Dashboard() {
     { label: "Total Campaigns", value: String(stats.totalCampaigns), icon: BarChart3, color: "text-violet-500" },
   ];
 
+  if (needsOnboarding) {
+    return <Onboarding onComplete={() => { setNeedsOnboarding(false); setLoading(true); load(); }} />;
+  }
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
