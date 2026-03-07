@@ -28,7 +28,13 @@ export default function Dashboard() {
     const load = async () => {
       // Fetch business info
       const { data: biz } = await supabase.from("businesses").select("id, name").eq("owner_id", user.id).maybeSingle();
-      if (biz?.name) setShopName(biz.name);
+      if (biz?.name) {
+        setShopName(biz.name);
+      } else {
+        setNeedsOnboarding(true);
+        setLoading(false);
+        return;
+      }
 
       // Fetch workers
       const { data: workers } = await supabase.from("workers").select("id, daily_salary").eq("user_id", user.id);
