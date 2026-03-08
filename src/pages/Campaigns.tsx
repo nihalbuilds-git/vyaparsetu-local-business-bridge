@@ -24,6 +24,8 @@ export default function Campaigns() {
   const [loading, setLoading] = useState(false);
   const [posterLoading, setPosterLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [editingMessage, setEditingMessage] = useState(false);
+  const [editedMessage, setEditedMessage] = useState("");
 
   useEffect(() => {
     if (!user) return;
