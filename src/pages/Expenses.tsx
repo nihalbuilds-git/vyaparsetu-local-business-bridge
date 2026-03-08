@@ -159,6 +159,82 @@ export default function Expenses() {
           </Card>
         </div>
 
+        {/* Category Breakdown */}
+        {!loading && entries.length > 0 && (() => {
+          const expensesByCategory: Record<string, number> = {};
+          const incomeByCategory: Record<string, number> = {};
+          entries.forEach(e => {
+            const cat = e.category || "Other";
+            if (e.entry_type === "expense") {
+              expensesByCategory[cat] = (expensesByCategory[cat] || 0) + Number(e.amount);
+            } else {
+              incomeByCategory[cat] = (incomeByCategory[cat] || 0) + Number(e.amount);
+            }
+          });
+          const categoryColors: Record<string, string> = {
+            "Rent": "bg-blue-500", "Electricity": "bg-yellow-500", "Stock Purchase": "bg-purple-500",
+            "Transport": "bg-orange-500", "Food": "bg-pink-500", "Salary": "bg-indigo-500",
+            "Other": "bg-gray-500", "Sales": "bg-emerald-500", "Service": "bg-teal-500", "Other Income": "bg-cyan-500",
+          };
+          const expenseEntries = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1]);
+          const incomeEntries = Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1]);
+
+          return (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {expenseEntries.length > 0 && (
+                <Card className="rounded-2xl border-border/40">
+                  <CardContent className="p-4">
+                    <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                      <TrendingDown size={16} className="text-red-500" /> Expense Breakdown
+                    </p>
+                    <div className="space-y-2">
+                      {expenseEntries.map(([cat, amt]) => {
+                        const pct = totalExpense > 0 ? (amt / totalExpense) * 100 : 0;
+                        return (
+                          <div key={cat}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="font-medium text-foreground">{cat}</span>
+                              <span className="text-muted-foreground">₹{amt.toLocaleString("en-IN")} ({pct.toFixed(0)}%)</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-accent overflow-hidden">
+                              <div className={`h-full rounded-full ${categoryColors[cat] || "bg-gray-500"}`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              {incomeEntries.length > 0 && (
+                <Card className="rounded-2xl border-border/40">
+                  <CardContent className="p-4">
+                    <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                      <TrendingUp size={16} className="text-green-500" /> Income Breakdown
+                    </p>
+                    <div className="space-y-2">
+                      {incomeEntries.map(([cat, amt]) => {
+                        const pct = totalIncome > 0 ? (amt / totalIncome) * 100 : 0;
+                        return (
+                          <div key={cat}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="font-medium text-foreground">{cat}</span>
+                              <span className="text-muted-foreground">₹{amt.toLocaleString("en-IN")} ({pct.toFixed(0)}%)</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-accent overflow-hidden">
+                              <div className={`h-full rounded-full ${categoryColors[cat] || "bg-gray-500"}`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          );
+        })()}
+
         {loading ? (
           <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>
         ) : entries.length === 0 ? (

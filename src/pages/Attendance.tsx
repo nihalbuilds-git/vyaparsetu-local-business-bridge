@@ -11,7 +11,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, CalendarIcon, CalendarDays, CheckCircle2, Users } from "lucide-react";
+import { Check, X, Clock, CalendarIcon, CalendarDays, CheckCircle2, Users, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type Status = "present" | "absent" | "half_day";
@@ -28,6 +29,7 @@ export default function Attendance() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const date = format(selectedDate, "yyyy-MM-dd");
   const isToday = date === format(new Date(), "yyyy-MM-dd");
@@ -141,6 +143,19 @@ export default function Attendance() {
           </div>
         )}
 
+        {/* Search Bar */}
+        {workers.length > 5 && (
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={lang === "hi" ? "वर्कर खोजें..." : "Search workers..."}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9 rounded-xl"
+            />
+          </div>
+        )}
+
         {/* Action Bar */}
         <div className="flex gap-2 flex-wrap items-center">
           <Popover>
@@ -185,7 +200,7 @@ export default function Attendance() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {workers.map((w) => {
+            {workers.filter(w => !searchQuery || w.name.toLowerCase().includes(searchQuery.toLowerCase()) || (w.role || "").toLowerCase().includes(searchQuery.toLowerCase())).map((w) => {
               const status = attendance[w.id];
               const config = status ? statusConfig[status] : null;
               return (
