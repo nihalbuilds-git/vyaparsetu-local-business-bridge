@@ -511,7 +511,8 @@ interface I18nContextType {
   t: (key: TranslationKey, replacements?: Record<string, string>) => string;
 }
 
-const I18nContext = createContext<I18nContextType | null>(null);
+const defaultT = (key: TranslationKey) => translations.en[key] as string || key;
+const I18nContext = createContext<I18nContextType>({ lang: "en", setLang: () => {}, t: defaultT });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
@@ -542,7 +543,5 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 }
 
 export function useI18n() {
-  const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
-  return ctx;
+  return useContext(I18nContext);
 }
