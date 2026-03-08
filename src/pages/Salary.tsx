@@ -229,7 +229,7 @@ export default function Salary() {
                         <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => generatePDF(w)}>
                           <Download size={14} /> {t("exportPdf")}
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => shareOnWhatsApp(w)}>
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => shareWorkerOnWhatsApp(w)}>
                           <Share2 size={14} /> {t("whatsApp")}
                         </Button>
                       </div>
