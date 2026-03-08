@@ -200,7 +200,7 @@ export default function Attendance() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {workers.map((w) => {
+            {workers.filter(w => !searchQuery || w.name.toLowerCase().includes(searchQuery.toLowerCase()) || (w.role || "").toLowerCase().includes(searchQuery.toLowerCase())).map((w) => {
               const status = attendance[w.id];
               const config = status ? statusConfig[status] : null;
               return (
