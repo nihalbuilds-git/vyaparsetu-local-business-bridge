@@ -18,7 +18,7 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/worker-advances", labelKey: "workerAdvances", icon: Clock },
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
   { to: "/contacts", labelKey: "contacts", icon: BookUser },
-  { to: "/analytics", labelKey: "analyticsTitle", icon: BarChart3 },
+  
   { to: "/stores", labelKey: "storesTitle", icon: Store },
   { to: "/pricing", labelKey: "pricingTitle", icon: Crown },
   { to: "/business-profile", labelKey: "profile", icon: User },

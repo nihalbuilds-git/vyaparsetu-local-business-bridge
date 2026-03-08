@@ -22,7 +22,7 @@ import Inventory from "./pages/Inventory";
 import Invoices from "./pages/Invoices";
 import Expenses from "./pages/Expenses";
 import WorkerAdvances from "./pages/WorkerAdvances";
-import Analytics from "./pages/Analytics";
+
 import Notifications from "./pages/Notifications";
 import Pricing from "./pages/Pricing";
 import Stores from "./pages/Stores";
