@@ -17,6 +17,11 @@ import CampaignHistory from "./pages/CampaignHistory";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import Profile from "./pages/Profile";
 import Contacts from "./pages/Contacts";
+import Khata from "./pages/Khata";
+import Inventory from "./pages/Inventory";
+import Invoices from "./pages/Invoices";
+import Expenses from "./pages/Expenses";
+import WorkerAdvances from "./pages/WorkerAdvances";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
