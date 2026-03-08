@@ -275,7 +275,7 @@ export default function Dashboard() {
               <h2 className="text-lg font-bold font-display text-foreground mb-4">
                 {lang === "hi" ? "तुरंत कार्रवाई" : "Quick Actions"}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {quickActions.map((action) => (
                   <Link key={action.to} to={action.to}>
                     <Card className="group border-border/40 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 rounded-2xl cursor-pointer">
