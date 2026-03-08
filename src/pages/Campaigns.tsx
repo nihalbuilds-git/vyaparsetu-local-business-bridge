@@ -215,6 +215,14 @@ export default function Campaigns() {
           </>
         )}
       </div>
+      {result && (
+        <SendCampaignDialog
+          open={sendOpen}
+          onOpenChange={setSendOpen}
+          message={result.message}
+          posterUrl={result.poster_url}
+        />
+      )}
     </AppLayout>
   );
 }
