@@ -33,14 +33,25 @@ export default function Campaigns() {
     });
   }, [user]);
 
-  const generate = async () => {
+  const generate = async (posterOnly = false) => {
     if (!form.offer_text) { toast({ title: t("enterOffer"), variant: "destructive" }); return; }
     if (!businessId) { toast({ title: t("setupBusinessFirst"), variant: "destructive" }); return; }
-    setLoading(true); setResult(null);
+    
+    if (posterOnly) {
+      setPosterLoading(true);
+      if (result) setResult({ ...result, poster_url: null });
+    } else {
+      setLoading(true); setResult(null);
+    }
+
     try {
-      const resp = await supabase.functions.invoke("generate-campaign", {
-        body: { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text },
-      });
+      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text };
+      if (posterOnly && result) {
+        body.poster_only = true;
+        body.existing_message = result.message;
+        body.existing_image_prompt = result.image_prompt;
+      }
+      const resp = await supabase.functions.invoke("generate-campaign", { body });
       if (resp.error) throw resp.error;
       const message = resp.data?.message || "";
       const image_prompt = resp.data?.image_prompt || "";
@@ -48,7 +59,7 @@ export default function Campaigns() {
       setResult({ message, image_prompt, poster_url });
     } catch (err: any) {
       toast({ title: t("error"), description: err.message || "Failed to generate", variant: "destructive" });
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setPosterLoading(false); }
   };
 
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: t("copiedToClipboard") }); };
