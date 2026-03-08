@@ -765,6 +765,29 @@ const translations = {
     ctaNote: "✓ मुफ़्त प्लान हमेशा मुफ़्त · ✓ समर्पित सहायता · ✓ कोई छिपे शुल्क नहीं",
     footerTagline: "स्थानीय दुकानदारों का डिजिटल साथी",
     madeWithLove: "❤️ से भारत के लिए बनाया गया",
+
+    // Analytics
+    analyticsTitle: "एनालिटिक्स डैशबोर्ड",
+    analyticsSubtext: "राजस्व रुझान, उपस्थिति पैटर्न और शीर्ष कर्मचारी",
+    revenueTrends: "राजस्व रुझान (6 महीने)",
+    attendancePatterns: "उपस्थिति पैटर्न (7 दिन)",
+    topWorkers: "इस महीने के शीर्ष कर्मचारी",
+
+    // Notifications
+    notificationsTitle: "सूचनाएँ",
+    notificationsSubtext: "अलर्ट और रिमाइंडर से अपडेट रहें",
+    noNotifications: "अभी तक कोई सूचना नहीं",
+
+    // Pricing
+    pricingTitle: "अपना प्लान चुनें",
+    pricingSubtext: "अपने बिज़नेस के लिए सबसे अच्छा प्लान चुनें",
+
+    // Stores
+    storesTitle: "मेरे स्टोर",
+    storesSubtext: "एक अकाउंट से कई दुकानें और शाखाएँ प्रबंधित करें",
+
+    // WhatsApp
+    shareOnWhatsApp: "WhatsApp पर शेयर करें",
   },
 } as const;
 

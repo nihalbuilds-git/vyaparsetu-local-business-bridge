@@ -86,6 +86,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <span className="font-bold font-display">VyaparSetu</span>
           </div>
           <div className="flex gap-1">
+            <NotificationBell />
             <Button variant="ghost" size="sm" onClick={toggleLang}>
               <Globe size={16} />
             </Button>
