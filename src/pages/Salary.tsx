@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, IndianRupee, Users, CalendarCheck, TrendingUp } from "lucide-react";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
@@ -100,9 +101,9 @@ export default function Salary() {
     toast({ title: t("pdfDownloaded"), description: t("salarySlipDownloaded", { name: worker.name }) });
   };
 
-  const shareOnWhatsApp = (worker: WorkerSalary) => {
+  const shareWorkerOnWhatsApp = (worker: WorkerSalary) => {
     const text = `*${t("salarySlip")} - ${businessName}*\n${t("month")}: ${monthLabel}\n\n${t("worker")}: ${worker.name}\n${t("role")}: ${worker.role || t("worker")}\n${t("present")}: ${worker.presentDays} days\n${t("halfDays")}: ${worker.halfDays}\n${t("absent")}: ${worker.absentDays} days\n${t("dailyRate")}: Rs. ${worker.daily_salary}\n*${t("finalSalary")}: Rs. ${worker.totalSalary.toLocaleString("en-IN")}*`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    shareOnWhatsApp(text);
   };
 
   const getInitials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
@@ -228,7 +229,7 @@ export default function Salary() {
                         <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => generatePDF(w)}>
                           <Download size={14} /> {t("exportPdf")}
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => shareOnWhatsApp(w)}>
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => shareWorkerOnWhatsApp(w)}>
                           <Share2 size={14} /> {t("whatsApp")}
                         </Button>
                       </div>

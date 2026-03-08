@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee } from "lucide-react";
+import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2 } from "lucide-react";
 import { format } from "date-fns";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 
 interface KhataEntry {
   id: string;
@@ -77,6 +78,14 @@ export default function Khata() {
   const totalCredit = entries.filter(e => e.entry_type === "credit").reduce((s, e) => s + Number(e.amount), 0);
   const totalDebit = entries.filter(e => e.entry_type === "debit").reduce((s, e) => s + Number(e.amount), 0);
   const balance = totalCredit - totalDebit;
+
+  const sendKhataReminder = (name: string, credit: number, debit: number, phone?: string | null) => {
+    const bal = credit - debit;
+    const text = bal > 0
+      ? `🔔 *Khata Reminder*\n\nHi ${name},\n\nAapka baaki hisaab:\n💰 Credit: ₹${credit.toLocaleString("en-IN")}\n💸 Debit: ₹${debit.toLocaleString("en-IN")}\n\n📌 *Balance: ₹${bal.toLocaleString("en-IN")} (Aapko dena hai)*\n\nKripya jaldi payment karein. Dhanyavaad! 🙏`
+      : `🔔 *Khata Reminder*\n\nHi ${name},\n\nAapka hisaab:\n💰 Credit: ₹${credit.toLocaleString("en-IN")}\n💸 Debit: ₹${debit.toLocaleString("en-IN")}\n\n✅ *Balance: ₹${Math.abs(bal).toLocaleString("en-IN")} (Hum denge)*\n\nDhanyavaad! 🙏`;
+    shareOnWhatsApp(text, phone ? `91${phone.replace(/[^0-9]/g, "")}` : undefined);
+  };
 
   // Group by customer
   const customerMap = new Map<string, { credit: number; debit: number; entries: KhataEntry[] }>();
@@ -167,7 +176,12 @@ export default function Khata() {
             <Card key={name} className="rounded-2xl overflow-hidden">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-bold">{name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base font-bold">{name}</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-600 hover:text-emerald-700" onClick={() => sendKhataReminder(name, data.credit, data.debit, data.entries[0]?.customer_phone)}>
+                      <Share2 size={14} />
+                    </Button>
+                  </div>
                   <span className={`text-sm font-bold ${data.credit - data.debit >= 0 ? "text-green-600" : "text-red-600"}`}>
                     ₹{Math.abs(data.credit - data.debit).toLocaleString("en-IN")} {data.credit - data.debit >= 0 ? t("khataCredit") : t("khataDebit")}
                   </span>

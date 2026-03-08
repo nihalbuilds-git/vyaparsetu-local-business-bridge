@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Trash2, Download, Share2, IndianRupee, Eye } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 
 interface InvoiceItem { name: string; qty: number; price: number; }
 interface Invoice {
@@ -118,8 +119,7 @@ export default function Invoices() {
 
   const shareWhatsApp = (inv: Invoice) => {
     const text = `*${t("invoiceFrom")} ${shopName}*\n${t("invoiceTo")}: ${inv.customer_name}\n${t("date")}: ${format(new Date(inv.date), "dd MMM yyyy")}\n\n${inv.items.map(i => `${i.name} x${i.qty} = ₹${i.qty * i.price}`).join("\n")}\n\nSubtotal: ₹${Number(inv.subtotal).toLocaleString("en-IN")}\nGST (${inv.gst_percent}%): ₹${(Number(inv.subtotal) * Number(inv.gst_percent) / 100).toLocaleString("en-IN")}\n*Total: ₹${Number(inv.total).toLocaleString("en-IN")}*`;
-    const url = inv.customer_phone ? `https://wa.me/91${inv.customer_phone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
+    shareOnWhatsApp(text, inv.customer_phone ? `91${inv.customer_phone}` : undefined);
   };
 
   return (
