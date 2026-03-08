@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Trash2, Download, Share2, IndianRupee, Eye } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 
 interface InvoiceItem { name: string; qty: number; price: number; }
 interface Invoice {
