@@ -129,14 +129,15 @@ export default function Campaigns() {
                     <h3 className="font-semibold font-display mb-3 flex items-center gap-2">
                       <ImageIcon size={18} className="text-primary" /> {t("posterPreview")}
                     </h3>
-                    {result.poster_url ? (
+                    {posterLoading ? (
+                      <div className="rounded-lg border-2 border-dashed border-border bg-muted flex flex-col items-center justify-center h-48 gap-2">
+                        <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        <p className="text-muted-foreground text-sm">🎨 Generating poster...</p>
+                      </div>
+                    ) : result.poster_url ? (
                       <div className="space-y-3">
                         <div className="rounded-lg overflow-hidden border border-border">
-                          <img
-                            src={result.poster_url}
-                            alt="Campaign poster"
-                            className="w-full h-auto"
-                          />
+                          <img src={result.poster_url} alt="Campaign poster" className="w-full h-auto" />
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => downloadPoster(result.poster_url!)}>
@@ -145,11 +146,19 @@ export default function Campaigns() {
                           <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => sharePoster(result.poster_url!)}>
                             <Share2 size={14} /> WhatsApp
                           </Button>
+                          <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => generate(true)} disabled={posterLoading}>
+                            <ImageIcon size={14} /> Regenerate
+                          </Button>
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
-                        <p className="text-muted-foreground text-sm">{t("posterPlaceholder")}</p>
+                      <div className="space-y-3">
+                        <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
+                          <p className="text-muted-foreground text-sm">{t("posterPlaceholder")}</p>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => generate(true)} disabled={posterLoading}>
+                          <ImageIcon size={14} /> Generate Poster
+                        </Button>
                       </div>
                     )}
                   </CardContent>
