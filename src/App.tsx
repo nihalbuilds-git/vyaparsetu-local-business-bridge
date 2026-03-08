@@ -16,6 +16,7 @@ import Campaigns from "./pages/Campaigns";
 import CampaignHistory from "./pages/CampaignHistory";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import Profile from "./pages/Profile";
+import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
