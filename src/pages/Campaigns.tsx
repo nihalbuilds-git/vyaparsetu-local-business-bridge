@@ -22,6 +22,7 @@ export default function Campaigns() {
   const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "" });
   const [result, setResult] = useState<{ message: string; image_prompt: string; poster_url: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [posterLoading, setPosterLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
@@ -32,14 +33,25 @@ export default function Campaigns() {
     });
   }, [user]);
 
-  const generate = async () => {
+  const generate = async (posterOnly = false) => {
     if (!form.offer_text) { toast({ title: t("enterOffer"), variant: "destructive" }); return; }
     if (!businessId) { toast({ title: t("setupBusinessFirst"), variant: "destructive" }); return; }
-    setLoading(true); setResult(null);
+    
+    if (posterOnly) {
+      setPosterLoading(true);
+      if (result) setResult({ ...result, poster_url: null });
+    } else {
+      setLoading(true); setResult(null);
+    }
+
     try {
-      const resp = await supabase.functions.invoke("generate-campaign", {
-        body: { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text },
-      });
+      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text };
+      if (posterOnly && result) {
+        body.poster_only = true;
+        body.existing_message = result.message;
+        body.existing_image_prompt = result.image_prompt;
+      }
+      const resp = await supabase.functions.invoke("generate-campaign", { body });
       if (resp.error) throw resp.error;
       const message = resp.data?.message || "";
       const image_prompt = resp.data?.image_prompt || "";
@@ -47,7 +59,7 @@ export default function Campaigns() {
       setResult({ message, image_prompt, poster_url });
     } catch (err: any) {
       toast({ title: t("error"), description: err.message || "Failed to generate", variant: "destructive" });
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setPosterLoading(false); }
   };
 
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: t("copiedToClipboard") }); };
@@ -92,7 +104,7 @@ export default function Campaigns() {
                   </Select>
                 </div>
                 <div><Label>{t("offerPromotion")}</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder={t("offerPlaceholder")} rows={3} /></div>
-                <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
+                <Button onClick={() => generate(false)} disabled={loading || posterLoading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
                   <Sparkles size={16} />
                   {loading ? (
                     <span className="flex items-center gap-2">
@@ -117,14 +129,15 @@ export default function Campaigns() {
                     <h3 className="font-semibold font-display mb-3 flex items-center gap-2">
                       <ImageIcon size={18} className="text-primary" /> {t("posterPreview")}
                     </h3>
-                    {result.poster_url ? (
+                    {posterLoading ? (
+                      <div className="rounded-lg border-2 border-dashed border-border bg-muted flex flex-col items-center justify-center h-48 gap-2">
+                        <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        <p className="text-muted-foreground text-sm">🎨 Generating poster...</p>
+                      </div>
+                    ) : result.poster_url ? (
                       <div className="space-y-3">
                         <div className="rounded-lg overflow-hidden border border-border">
-                          <img
-                            src={result.poster_url}
-                            alt="Campaign poster"
-                            className="w-full h-auto"
-                          />
+                          <img src={result.poster_url} alt="Campaign poster" className="w-full h-auto" />
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => downloadPoster(result.poster_url!)}>
@@ -133,11 +146,19 @@ export default function Campaigns() {
                           <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => sharePoster(result.poster_url!)}>
                             <Share2 size={14} /> WhatsApp
                           </Button>
+                          <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => generate(true)} disabled={posterLoading}>
+                            <ImageIcon size={14} /> Regenerate
+                          </Button>
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
-                        <p className="text-muted-foreground text-sm">{t("posterPlaceholder")}</p>
+                      <div className="space-y-3">
+                        <div className="rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center h-48">
+                          <p className="text-muted-foreground text-sm">{t("posterPlaceholder")}</p>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => generate(true)} disabled={posterLoading}>
+                          <ImageIcon size={14} /> Generate Poster
+                        </Button>
                       </div>
                     )}
                   </CardContent>

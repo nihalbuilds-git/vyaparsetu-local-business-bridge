@@ -11,7 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { business_id, campaign_type, offer_text } = await req.json();
+    const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt } = await req.json();
     if (!business_id || !campaign_type || !offer_text) {
       return new Response(JSON.stringify({ error: "business_id, campaign_type, and offer_text are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -28,64 +28,71 @@ serve(async (req) => {
     const businessName = biz?.name || "My Shop";
     const category = biz?.category || "General Store";
 
-    // Step 1: Generate marketing message + image prompt
-    const systemPrompt = `You are a marketing expert for small Indian businesses. You must respond with valid JSON only, no markdown.
+    let message = "";
+    let image_prompt = "";
+
+    if (poster_only && existing_message) {
+      // Skip text generation, reuse existing message & prompt
+      message = existing_message;
+      image_prompt = existing_image_prompt || `Marketing poster for ${businessName} ${category} store, ${campaign_type} campaign, ${offer_text}`;
+    } else {
+      // Step 1: Generate marketing message + image prompt
+      const systemPrompt = `You are a marketing expert for small Indian businesses. You must respond with valid JSON only, no markdown.
 Return a JSON object with exactly two keys:
 - "message": A compelling marketing message (under 500 chars, with emojis, culturally relevant for India, includes a call to action)
 - "image_prompt": A detailed text-to-image prompt describing a marketing poster for this campaign (include style, colors, elements, text to show on poster)`;
 
-    const userPrompt = `Business: ${businessName}
+      const userPrompt = `Business: ${businessName}
 Category: ${category}
 Campaign Type: ${campaign_type}
 Offer: ${offer_text}
 
 Generate the marketing message and image prompt as JSON.`;
 
-    const textResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+      const textResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      });
 
-    if (!textResponse.ok) {
-      const status = textResponse.status;
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (!textResponse.ok) {
+        const status = textResponse.status;
+        if (status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const text = await textResponse.text();
+        console.error("AI gateway error:", status, text);
+        throw new Error("AI gateway error");
       }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+
+      const data = await textResponse.json();
+      const raw = data.choices?.[0]?.message?.content || "";
+
+      try {
+        const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+        message = parsed.message || "";
+        image_prompt = parsed.image_prompt || "";
+      } catch {
+        message = raw;
+        image_prompt = `Marketing poster for ${businessName} ${category} store, ${campaign_type} campaign, ${offer_text}`;
       }
-      const text = await textResponse.text();
-      console.error("AI gateway error:", status, text);
-      throw new Error("AI gateway error");
-    }
-
-    const data = await textResponse.json();
-    const raw = data.choices?.[0]?.message?.content || "";
-
-    let message = "";
-    let image_prompt = "";
-    try {
-      const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-      message = parsed.message || "";
-      image_prompt = parsed.image_prompt || "";
-    } catch {
-      message = raw;
-      image_prompt = `Marketing poster for ${businessName} ${category} store, ${campaign_type} campaign, ${offer_text}`;
     }
 
     // Step 2: Generate poster image
