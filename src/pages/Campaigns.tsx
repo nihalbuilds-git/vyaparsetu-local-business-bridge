@@ -168,9 +168,30 @@ export default function Campaigns() {
                 <Card><CardContent className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold font-display">{t("marketingMessage")}</h3>
-                    <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> {t("copy")}</Button>
+                    <div className="flex gap-1">
+                      {editingMessage ? (
+                        <Button variant="ghost" size="sm" onClick={() => setEditingMessage(false)} className="gap-1 text-green-600"><Check size={14} /> Done</Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" onClick={() => { setEditedMessage(result.message); setEditingMessage(true); }} className="gap-1"><Pencil size={14} /> Edit</Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => copy(editingMessage ? editedMessage : result.message)} className="gap-1"><Copy size={14} /> {t("copy")}</Button>
+                    </div>
                   </div>
-                  <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+                  {editingMessage ? (
+                    <Textarea
+                      value={editedMessage}
+                      onChange={(e) => {
+                        const val = e.target.value.slice(0, 1000);
+                        setEditedMessage(val);
+                        setResult({ ...result, message: val });
+                      }}
+                      rows={6}
+                      className="text-sm"
+                      maxLength={1000}
+                    />
+                  ) : (
+                    <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+                  )}
                 </CardContent></Card>
 
                 {/* Image Prompt */}
