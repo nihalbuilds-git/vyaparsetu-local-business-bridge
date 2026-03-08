@@ -220,6 +220,36 @@ const translations = {
     language: "Language",
     english: "English",
     hindi: "हिन्दी",
+
+    // Contacts
+    contacts: "Contacts",
+    addContact: "Add Contact",
+    editContact: "Edit Contact",
+    manageContacts: "Save & manage your customer contacts",
+    searchContacts: "Search by name, phone or category...",
+    noContactsYet: "No contacts added yet",
+    noContactsFound: "No contacts found",
+    contactAdded: "Contact added!",
+    contactUpdated: "Contact updated!",
+    contactDeleted: "Contact deleted",
+    deleteContact: "Delete Contact?",
+    deleteContactDesc: "Are you sure you want to delete \"{name}\"?",
+    contactNamePlaceholder: "Contact name",
+    contactCategory: "Category",
+    invalidEmail: "Enter a valid email address",
+
+    // Send Campaign
+    sendCampaign: "Send Campaign",
+    selectAtLeastOne: "Select at least one contact",
+    campaignSentSuccess: "Campaign opened for {count} contacts!",
+    copyLink: "Copy Link",
+    campaignSent: "Campaign Sent!",
+    campaignSentDesc: "Your campaign has been shared with your selected contacts.",
+    done: "Done",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    selected: "selected",
+    sendTo: "Send to {count} contacts",
   },
   hi: {
     // Nav
@@ -438,6 +468,36 @@ const translations = {
     language: "भाषा",
     english: "English",
     hindi: "हिन्दी",
+
+    // Contacts
+    contacts: "संपर्क",
+    addContact: "संपर्क जोड़ें",
+    editContact: "संपर्क संपादित करें",
+    manageContacts: "अपने ग्राहक संपर्क सहेजें और प्रबंधित करें",
+    searchContacts: "नाम, फ़ोन या श्रेणी से खोजें...",
+    noContactsYet: "अभी तक कोई संपर्क नहीं जोड़ा गया",
+    noContactsFound: "कोई संपर्क नहीं मिला",
+    contactAdded: "संपर्क जोड़ा गया!",
+    contactUpdated: "संपर्क अपडेट किया गया!",
+    contactDeleted: "संपर्क हटाया गया",
+    deleteContact: "संपर्क हटाएं?",
+    deleteContactDesc: "क्या आप वाकई \"{name}\" को हटाना चाहते हैं?",
+    contactNamePlaceholder: "संपर्क का नाम",
+    contactCategory: "श्रेणी",
+    invalidEmail: "एक मान्य ईमेल पता दर्ज करें",
+
+    // Send Campaign
+    sendCampaign: "अभियान भेजें",
+    selectAtLeastOne: "कम से कम एक संपर्क चुनें",
+    campaignSentSuccess: "{count} संपर्कों के लिए अभियान खोला गया!",
+    copyLink: "लिंक कॉपी करें",
+    campaignSent: "अभियान भेजा गया!",
+    campaignSentDesc: "आपका अभियान चुने हुए संपर्कों के साथ साझा किया गया है।",
+    done: "हो गया",
+    selectAll: "सभी चुनें",
+    deselectAll: "सभी हटाएं",
+    selected: "चुने गए",
+    sendTo: "{count} संपर्कों को भेजें",
   },
 } as const;
 

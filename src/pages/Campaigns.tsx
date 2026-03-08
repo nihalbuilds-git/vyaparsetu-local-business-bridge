@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Copy, Download, Share2, Image as ImageIcon, Pencil, Check } from "lucide-react";
+import { Sparkles, Copy, Download, Share2, Image as ImageIcon, Pencil, Check, Send } from "lucide-react";
+import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
 
@@ -26,6 +27,7 @@ export default function Campaigns() {
   const [pageLoading, setPageLoading] = useState(true);
   const [editingMessage, setEditingMessage] = useState(false);
   const [editedMessage, setEditedMessage] = useState("");
+  const [sendOpen, setSendOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -125,6 +127,10 @@ export default function Campaigns() {
             </Card>
             {result && (
               <div className="space-y-4 animate-fade-in">
+                {/* Send Campaign Button */}
+                <Button onClick={() => setSendOpen(true)} className="w-full gap-2" variant="outline" size="lg">
+                  <Send size={18} /> {t("sendCampaign")}
+                </Button>
                 {/* Poster */}
                 <Card>
                   <CardContent className="p-6">
@@ -209,6 +215,14 @@ export default function Campaigns() {
           </>
         )}
       </div>
+      {result && (
+        <SendCampaignDialog
+          open={sendOpen}
+          onOpenChange={setSendOpen}
+          message={result.message}
+          posterUrl={result.poster_url}
+        />
+      )}
     </AppLayout>
   );
 }
