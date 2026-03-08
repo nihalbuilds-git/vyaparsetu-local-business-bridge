@@ -220,6 +220,36 @@ const translations = {
     language: "Language",
     english: "English",
     hindi: "हिन्दी",
+
+    // Contacts
+    contacts: "Contacts",
+    addContact: "Add Contact",
+    editContact: "Edit Contact",
+    manageContacts: "Save & manage your customer contacts",
+    searchContacts: "Search by name, phone or category...",
+    noContactsYet: "No contacts added yet",
+    noContactsFound: "No contacts found",
+    contactAdded: "Contact added!",
+    contactUpdated: "Contact updated!",
+    contactDeleted: "Contact deleted",
+    deleteContact: "Delete Contact?",
+    deleteContactDesc: "Are you sure you want to delete \"{name}\"?",
+    contactNamePlaceholder: "Contact name",
+    contactCategory: "Category",
+    invalidEmail: "Enter a valid email address",
+
+    // Send Campaign
+    sendCampaign: "Send Campaign",
+    selectAtLeastOne: "Select at least one contact",
+    campaignSentSuccess: "Campaign opened for {count} contacts!",
+    copyLink: "Copy Link",
+    campaignSent: "Campaign Sent!",
+    campaignSentDesc: "Your campaign has been shared with your selected contacts.",
+    done: "Done",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    selected: "selected",
+    sendTo: "Send to {count} contacts",
   },
   hi: {
     // Nav
