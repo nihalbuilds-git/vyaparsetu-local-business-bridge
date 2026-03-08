@@ -143,6 +143,19 @@ export default function Attendance() {
           </div>
         )}
 
+        {/* Search Bar */}
+        {workers.length > 5 && (
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={lang === "hi" ? "वर्कर खोजें..." : "Search workers..."}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9 rounded-xl"
+            />
+          </div>
+        )}
+
         {/* Action Bar */}
         <div className="flex gap-2 flex-wrap items-center">
           <Popover>
