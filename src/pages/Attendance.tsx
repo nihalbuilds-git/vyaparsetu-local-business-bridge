@@ -11,7 +11,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, CalendarIcon, CalendarDays, CheckCircle2, Users } from "lucide-react";
+import { Check, X, Clock, CalendarIcon, CalendarDays, CheckCircle2, Users, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type Status = "present" | "absent" | "half_day";
