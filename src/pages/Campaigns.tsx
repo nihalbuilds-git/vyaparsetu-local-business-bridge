@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Copy, Download, Share2, Image as ImageIcon, Pencil, Check } from "lucide-react";
+import { Sparkles, Copy, Download, Share2, Image as ImageIcon, Pencil, Check, Send } from "lucide-react";
+import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
 
