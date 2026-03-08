@@ -95,6 +95,12 @@ export default function Expenses() {
           </div>
           <div className="flex gap-2">
             <Input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="rounded-xl w-auto" />
+            <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
+              downloadCSV(`expenses-${selectedMonth}`, ["Date", "Type", "Category", "Description", "Amount"],
+                entries.map(e => [format(new Date(e.date), "dd MMM yyyy"), e.entry_type, e.category || "", e.description || "", Number(e.amount)])
+              );
+              toast({ title: "CSV Downloaded" });
+            }}><Download size={16} /> CSV</Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground gap-2 rounded-xl"><Plus size={18} /> {t("addEntry")}</Button>
