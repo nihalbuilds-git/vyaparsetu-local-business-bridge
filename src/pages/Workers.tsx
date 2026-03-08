@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Camera } from "lucide-react";
+import { Plus, Trash2, Edit2, Camera, Users, Phone, Briefcase, IndianRupee, Search } from "lucide-react";
 
 interface Worker {
   id: string;
@@ -30,7 +30,7 @@ interface Worker {
 export default function Workers() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -41,6 +41,7 @@ export default function Workers() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -150,112 +151,201 @@ export default function Workers() {
 
   const getInitials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
+  const filteredWorkers = workers.filter(w =>
+    w.name.toLowerCase().includes(search.toLowerCase()) ||
+    (w.role || "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalSalary = workers.reduce((sum, w) => sum + Number(w.daily_salary), 0);
+
   return (
     <AppLayout>
-      <div className="animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">{t("workers")}</h1>
-            <p className="text-muted-foreground">{t("manageTeam")}</p>
-          </div>
-          <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> {t("addWorker")}</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle className="font-display">{editId ? t("editWorker") : t("addWorker")}</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="relative cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
-                    <Avatar className="h-20 w-20 border-2 border-border">
-                      {avatarPreview ? (
-                        <AvatarImage src={avatarPreview} alt="Worker photo" />
-                      ) : (
-                        <AvatarFallback className="bg-accent text-accent-foreground text-lg font-display">
-                          {form.name ? getInitials(form.name) : <Camera size={24} />}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div className="absolute inset-0 rounded-full bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Camera size={20} className="text-background" />
-                    </div>
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                  <p className="text-xs text-muted-foreground">{t("tapToUpload")}</p>
-                </div>
-
-                <div>
-                  <Label>{t("name")} *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("workerNamePlaceholder")} />
-                  {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
-                </div>
-                <div>
-                  <Label>{t("phone")}</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("phonePlaceholder10")} />
-                  {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
-                </div>
-                <div><Label>{t("role")}</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder={t("rolePlaceholder")} /></div>
-                <div>
-                  <Label>{t("dailySalaryRs")}</Label>
-                  <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
-                  {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
-                </div>
-                <Button onClick={handleSave} disabled={uploading} className="w-full gradient-primary text-primary-foreground">
-                  {uploading ? t("saving") : t("save")}
-                </Button>
+      <div className="animate-fade-in space-y-6">
+        {/* Header Banner */}
+        <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8">
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
+          <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
+          <div className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
+                <Users size={24} className="text-primary-foreground" />
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {loading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}><CardContent className="p-4 space-y-3"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full rounded-lg" /></CardContent></Card>
-            ))}
-          </div>
-        ) : workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>{t("noWorkersYet")}</p></CardContent></Card>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {workers.map((w) => (
-              <Card key={w.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border border-border">
-                        {w.avatar_url ? <AvatarImage src={w.avatar_url} alt={w.name} /> : (
-                          <AvatarFallback className="bg-accent text-accent-foreground text-xs font-display">{getInitials(w.name)}</AvatarFallback>
+              <div>
+                <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">{t("workers")}</h1>
+                <p className="text-primary-foreground/70 text-sm mt-1">{t("manageTeam")}</p>
+              </div>
+            </div>
+            <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(true); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-primary-foreground gap-2 rounded-xl font-bold backdrop-blur-sm border border-white/10">
+                  <Plus size={16} /> {t("addWorker")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="rounded-2xl">
+                <DialogHeader><DialogTitle className="font-display">{editId ? t("editWorker") : t("addWorker")}</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
+                      <Avatar className="h-20 w-20 border-2 border-border">
+                        {avatarPreview ? (
+                          <AvatarImage src={avatarPreview} alt="Worker photo" />
+                        ) : (
+                          <AvatarFallback className="bg-accent text-accent-foreground text-lg font-display">
+                            {form.name ? getInitials(form.name) : <Camera size={24} />}
+                          </AvatarFallback>
                         )}
                       </Avatar>
-                      <div>
-                        <h3 className="font-semibold font-display">{w.name}</h3>
-                        <p className="text-sm text-muted-foreground">{w.role || t("noRole")}</p>
-                        {w.phone && <p className="text-sm text-muted-foreground">{w.phone}</p>}
+                      <div className="absolute inset-0 rounded-full bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera size={20} className="text-background" />
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(w)}><Edit2 size={14} /></Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive"><Trash2 size={14} /></Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t("removeWorker")}</AlertDialogTitle>
-                            <AlertDialogDescription>{t("removeWorkerDesc", { name: w.name })}</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t("delete")}</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                    <p className="text-xs text-muted-foreground">{t("tapToUpload")}</p>
                   </div>
-                  <div className="mt-3 flex items-center justify-between rounded-lg bg-accent px-3 py-2">
-                    <span className="text-xs text-muted-foreground">{t("dailySalary")}</span>
-                    <span className="font-semibold text-accent-foreground">₹{Number(w.daily_salary).toLocaleString("en-IN")}</span>
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("name")} *</Label>
+                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("workerNamePlaceholder")} className="rounded-xl mt-1.5" />
+                    {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("phone")}</Label>
+                    <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("phonePlaceholder10")} className="rounded-xl mt-1.5" />
+                    {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("role")}</Label>
+                    <Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder={t("rolePlaceholder")} className="rounded-xl mt-1.5" />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("dailySalaryRs")}</Label>
+                    <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" className="rounded-xl mt-1.5" />
+                    {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
+                  </div>
+                  <Button onClick={handleSave} disabled={uploading} className="w-full gradient-primary text-primary-foreground rounded-xl h-11 font-bold">
+                    {uploading ? t("saving") : t("save")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        {!loading && workers.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <Card className="rounded-2xl border-border/40">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-xl gradient-primary p-2.5 shrink-0"><Users size={18} className="text-primary-foreground" /></div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">{lang === "hi" ? "कुल कर्मचारी" : "Total"}</p>
+                  <p className="text-xl font-extrabold font-display">{workers.length}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border-border/40">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-xl bg-amber-500 p-2.5 shrink-0"><IndianRupee size={18} className="text-white" /></div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">{lang === "hi" ? "कुल दैनिक" : "Daily Total"}</p>
+                  <p className="text-xl font-extrabold font-display">₹{totalSalary.toLocaleString("en-IN")}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border-border/40 col-span-2 sm:col-span-1">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-xl bg-emerald-500 p-2.5 shrink-0"><Briefcase size={18} className="text-white" /></div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">{lang === "hi" ? "भूमिकाएं" : "Roles"}</p>
+                  <p className="text-xl font-extrabold font-display">{new Set(workers.map(w => w.role).filter(Boolean)).size}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Search */}
+        {!loading && workers.length > 0 && (
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={lang === "hi" ? "नाम या भूमिका से खोजें..." : "Search by name or role..."}
+              className="pl-10 rounded-xl h-11 border-border/40"
+            />
+          </div>
+        )}
+
+        {/* Workers Grid */}
+        {loading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}
+          </div>
+        ) : workers.length === 0 ? (
+          <Card className="border-dashed rounded-2xl">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <div className="w-16 h-16 rounded-2xl bg-accent grid place-items-center mb-4">
+                <Users size={32} className="text-muted-foreground/50" />
+              </div>
+              <p className="font-medium">{t("noWorkersYet")}</p>
+              <p className="text-sm mt-1">{lang === "hi" ? "ऊपर + बटन से जोड़ें" : "Click + above to add"}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredWorkers.map((w) => (
+              <Card key={w.id} className="group rounded-2xl border-border/40 hover:border-primary/20 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Card Top */}
+                  <div className="p-5 pb-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12 border-2 border-border shadow-sm">
+                          {w.avatar_url ? <AvatarImage src={w.avatar_url} alt={w.name} /> : (
+                            <AvatarFallback className="bg-accent text-accent-foreground text-sm font-bold font-display">{getInitials(w.name)}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div className="min-w-0">
+                          <h3 className="font-bold font-display text-foreground truncate">{w.name}</h3>
+                          <p className="text-xs text-muted-foreground truncate">{w.role || t("noRole")}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => handleEdit(w)}>
+                          <Edit2 size={14} />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive">
+                              <Trash2 size={14} />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t("removeWorker")}</AlertDialogTitle>
+                              <AlertDialogDescription>{t("removeWorkerDesc", { name: w.name })}</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl">{t("cancel")}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">{t("delete")}</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+
+                    {/* Details Row */}
+                    {w.phone && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        <Phone size={12} /> {w.phone}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Salary Footer */}
+                  <div className="bg-gradient-to-r from-primary/5 to-accent border-t border-border/40 px-5 py-3 flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">{t("dailySalary")}</span>
+                    <span className="font-extrabold font-display text-foreground">₹{Number(w.daily_salary).toLocaleString("en-IN")}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -265,8 +355,4 @@ export default function Workers() {
       </div>
     </AppLayout>
   );
-}
-
-function UsersIcon({ size, className }: { size: number; className?: string }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 }
