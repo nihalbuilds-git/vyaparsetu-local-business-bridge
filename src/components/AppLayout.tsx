@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
-import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser, CreditCard, Package, FileText, Wallet, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashboard }[] = [
@@ -10,6 +10,11 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/workers", labelKey: "workers", icon: Users },
   { to: "/attendance", labelKey: "attendance", icon: CalendarCheck },
   { to: "/salary", labelKey: "salary", icon: IndianRupee },
+  { to: "/khata", labelKey: "khataBook", icon: CreditCard },
+  { to: "/inventory", labelKey: "inventory", icon: Package },
+  { to: "/invoices", labelKey: "invoices", icon: FileText },
+  { to: "/expenses", labelKey: "expenseTracker", icon: Wallet },
+  { to: "/worker-advances", labelKey: "workerAdvances", icon: Clock },
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
   { to: "/contacts", labelKey: "contacts", icon: BookUser },
   { to: "/business-profile", labelKey: "profile", icon: User },

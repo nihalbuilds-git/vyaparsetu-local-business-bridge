@@ -141,6 +141,185 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          business_id: string
+          category: string | null
+          created_at: string
+          date: string
+          description: string | null
+          entry_type: string
+          id: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_items: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          item_name: string
+          low_stock_threshold: number
+          purchase_price: number
+          quantity: number
+          selling_price: number
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          item_name: string
+          low_stock_threshold?: number
+          purchase_price?: number
+          quantity?: number
+          selling_price?: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          low_stock_threshold?: number
+          purchase_price?: number
+          quantity?: number
+          selling_price?: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          date: string
+          gst_percent: number
+          id: string
+          items: Json
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          date?: string
+          gst_percent?: number
+          id?: string
+          items?: Json
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          date?: string
+          gst_percent?: number
+          id?: string
+          items?: Json
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      khata_entries: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          date: string
+          description: string | null
+          entry_type: string
+          id: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          date?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          date?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "khata_entries_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -176,6 +355,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      worker_advances: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          status: string
+          worker_id: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          status?: string
+          worker_id: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          status?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_advances_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_advances_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workers: {
         Row: {

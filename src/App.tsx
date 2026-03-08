@@ -17,6 +17,11 @@ import CampaignHistory from "./pages/CampaignHistory";
 import AttendanceCalendar from "./pages/AttendanceCalendar";
 import Profile from "./pages/Profile";
 import Contacts from "./pages/Contacts";
+import Khata from "./pages/Khata";
+import Inventory from "./pages/Inventory";
+import Invoices from "./pages/Invoices";
+import Expenses from "./pages/Expenses";
+import WorkerAdvances from "./pages/WorkerAdvances";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +56,11 @@ const App = () => (
               <Route path="/campaigns" element={<Navigate to="/campaign" replace />} />
               <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
               <Route path="/business-profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/khata" element={<ProtectedRoute><Khata /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+              <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+              <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+              <Route path="/worker-advances" element={<ProtectedRoute><WorkerAdvances /></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
