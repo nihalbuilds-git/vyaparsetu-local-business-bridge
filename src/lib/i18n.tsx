@@ -488,6 +488,7 @@ const translations = {
     invalidEmail: "एक मान्य ईमेल पता दर्ज करें",
 
     // Send Campaign
+    send: "भेजें",
     sendCampaign: "अभियान भेजें",
     selectAtLeastOne: "कम से कम एक संपर्क चुनें",
     campaignSentSuccess: "{count} संपर्कों के लिए अभियान खोला गया!",
