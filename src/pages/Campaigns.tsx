@@ -22,6 +22,7 @@ export default function Campaigns() {
   const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "" });
   const [result, setResult] = useState<{ message: string; image_prompt: string; poster_url: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [posterLoading, setPosterLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
