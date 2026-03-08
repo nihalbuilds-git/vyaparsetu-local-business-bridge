@@ -60,9 +60,14 @@ export default function CampaignHistory() {
                       </div>
                       <p className="text-sm line-clamp-2">{c.message || t("noMessage")}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="gap-1 shrink-0" onClick={() => setSelected(c)}>
-                      <Eye size={14} /> {t("view")}
-                    </Button>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelected(c)}>
+                        <Eye size={14} /> {t("view")}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSendCampaign(c)}>
+                        <Send size={14} /> {t("send")}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
