@@ -468,6 +468,36 @@ const translations = {
     language: "भाषा",
     english: "English",
     hindi: "हिन्दी",
+
+    // Contacts
+    contacts: "संपर्क",
+    addContact: "संपर्क जोड़ें",
+    editContact: "संपर्क संपादित करें",
+    manageContacts: "अपने ग्राहक संपर्क सहेजें और प्रबंधित करें",
+    searchContacts: "नाम, फ़ोन या श्रेणी से खोजें...",
+    noContactsYet: "अभी तक कोई संपर्क नहीं जोड़ा गया",
+    noContactsFound: "कोई संपर्क नहीं मिला",
+    contactAdded: "संपर्क जोड़ा गया!",
+    contactUpdated: "संपर्क अपडेट किया गया!",
+    contactDeleted: "संपर्क हटाया गया",
+    deleteContact: "संपर्क हटाएं?",
+    deleteContactDesc: "क्या आप वाकई \"{name}\" को हटाना चाहते हैं?",
+    contactNamePlaceholder: "संपर्क का नाम",
+    contactCategory: "श्रेणी",
+    invalidEmail: "एक मान्य ईमेल पता दर्ज करें",
+
+    // Send Campaign
+    sendCampaign: "अभियान भेजें",
+    selectAtLeastOne: "कम से कम एक संपर्क चुनें",
+    campaignSentSuccess: "{count} संपर्कों के लिए अभियान खोला गया!",
+    copyLink: "लिंक कॉपी करें",
+    campaignSent: "अभियान भेजा गया!",
+    campaignSentDesc: "आपका अभियान चुने हुए संपर्कों के साथ साझा किया गया है।",
+    done: "हो गया",
+    selectAll: "सभी चुनें",
+    deselectAll: "सभी हटाएं",
+    selected: "चुने गए",
+    sendTo: "{count} संपर्कों को भेजें",
   },
 } as const;
 
