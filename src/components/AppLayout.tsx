@@ -96,17 +96,23 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card">
-          {navItems.slice(0, 5).map(({ to, labelKey, icon: Icon }) => (
+        {/* Mobile bottom nav - key actions */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+          {[
+            { to: "/dashboard", labelKey: "dashboard" as TranslationKey, icon: LayoutDashboard },
+            { to: "/attendance", labelKey: "attendance" as TranslationKey, icon: CalendarCheck },
+            { to: "/khata", labelKey: "khataBook" as TranslationKey, icon: CreditCard },
+            { to: "/invoices", labelKey: "invoices" as TranslationKey, icon: FileText },
+            { to: "/expenses", labelKey: "expenseTracker" as TranslationKey, icon: Wallet },
+          ].map(({ to, labelKey, icon: Icon }) => (
             <Link
               key={to}
               to={to}
-              className={`flex flex-1 flex-col items-center gap-1 py-2 text-[10px] ${
+              className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
                 pathname === to ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={20} />
               {t(labelKey)}
             </Link>
           ))}
