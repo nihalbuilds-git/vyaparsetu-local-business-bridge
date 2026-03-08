@@ -79,6 +79,14 @@ export default function Khata() {
   const totalDebit = entries.filter(e => e.entry_type === "debit").reduce((s, e) => s + Number(e.amount), 0);
   const balance = totalCredit - totalDebit;
 
+  const sendKhataReminder = (name: string, credit: number, debit: number, phone?: string | null) => {
+    const bal = credit - debit;
+    const text = bal > 0
+      ? `🔔 *Khata Reminder*\n\nHi ${name},\n\nAapka baaki hisaab:\n💰 Credit: ₹${credit.toLocaleString("en-IN")}\n💸 Debit: ₹${debit.toLocaleString("en-IN")}\n\n📌 *Balance: ₹${bal.toLocaleString("en-IN")} (Aapko dena hai)*\n\nKripya jaldi payment karein. Dhanyavaad! 🙏`
+      : `🔔 *Khata Reminder*\n\nHi ${name},\n\nAapka hisaab:\n💰 Credit: ₹${credit.toLocaleString("en-IN")}\n💸 Debit: ₹${debit.toLocaleString("en-IN")}\n\n✅ *Balance: ₹${Math.abs(bal).toLocaleString("en-IN")} (Hum denge)*\n\nDhanyavaad! 🙏`;
+    shareOnWhatsApp(text, phone ? `91${phone.replace(/[^0-9]/g, "")}` : undefined);
+  };
+
   // Group by customer
   const customerMap = new Map<string, { credit: number; debit: number; entries: KhataEntry[] }>();
   filtered.forEach(e => {
