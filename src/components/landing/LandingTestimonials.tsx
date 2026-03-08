@@ -13,7 +13,7 @@ export default function LandingTestimonials() {
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-16 sm:py-24 px-4 sm:px-[5%] max-w-[1100px] mx-auto">
-      <p className="reveal-card opacity-0 text-center text-xs font-bold tracking-[0.15em] uppercase text-primary mb-2 sm:mb-3">
+      <p className="reveal-card opacity-0 text-center text-sm sm:text-base font-extrabold tracking-[0.15em] uppercase text-primary mb-2 sm:mb-3">
         {t("whatPeopleSay")}
       </p>
       <h2 className="reveal-card opacity-0 text-center font-display font-extrabold text-foreground mb-2 sm:mb-3 text-2xl sm:text-3xl md:text-4xl">
