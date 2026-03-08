@@ -176,7 +176,12 @@ export default function Khata() {
             <Card key={name} className="rounded-2xl overflow-hidden">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-bold">{name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base font-bold">{name}</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-600 hover:text-emerald-700" onClick={() => sendKhataReminder(name, data.credit, data.debit, data.entries[0]?.customer_phone)}>
+                      <Share2 size={14} />
+                    </Button>
+                  </div>
                   <span className={`text-sm font-bold ${data.credit - data.debit >= 0 ? "text-green-600" : "text-red-600"}`}>
                     ₹{Math.abs(data.credit - data.debit).toLocaleString("en-IN")} {data.credit - data.debit >= 0 ? t("khataCredit") : t("khataDebit")}
                   </span>
