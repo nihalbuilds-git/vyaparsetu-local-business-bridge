@@ -246,6 +246,15 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Business Health Insights */}
+            <BusinessInsights
+              khataBalance={health.khataBalance}
+              lowStockCount={health.lowStockCount}
+              monthlyIncome={health.monthlyIncome}
+              monthlyExpense={health.monthlyExpense}
+              lang={lang}
+            />
+
             {/* Quick Actions */}
             <div>
               <h2 className="text-lg font-bold font-display text-foreground mb-4">
