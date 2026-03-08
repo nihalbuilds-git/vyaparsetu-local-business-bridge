@@ -17,7 +17,7 @@ export default function LandingHowItWorks() {
     }}>
       <div className="absolute -top-1/2 -right-[10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full pointer-events-none" style={{ background: "rgba(255,255,255,0.04)" }} />
 
-      <p className="reveal-card opacity-0 text-center text-xs font-bold tracking-[0.15em] uppercase text-primary-foreground/70 mb-2 sm:mb-3">
+      <p className="reveal-card opacity-0 text-center text-sm sm:text-base font-extrabold tracking-[0.15em] uppercase text-primary-foreground/70 mb-2 sm:mb-3">
         {t("threeSimpleSteps")}
       </p>
       <h2 className="reveal-card opacity-0 text-center font-display font-extrabold text-primary-foreground mb-2 sm:mb-3 text-2xl sm:text-3xl md:text-4xl">
