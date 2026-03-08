@@ -104,7 +104,7 @@ export default function Campaigns() {
                   </Select>
                 </div>
                 <div><Label>{t("offerPromotion")}</Label><Textarea value={form.offer_text} onChange={(e) => setForm({ ...form, offer_text: e.target.value })} placeholder={t("offerPlaceholder")} rows={3} /></div>
-                <Button onClick={generate} disabled={loading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
+                <Button onClick={() => generate(false)} disabled={loading || posterLoading || !businessId} className="w-full gradient-primary text-primary-foreground gap-2">
                   <Sparkles size={16} />
                   {loading ? (
                     <span className="flex items-center gap-2">
