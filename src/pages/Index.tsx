@@ -241,8 +241,20 @@ export default function Index() {
         />
       ))}
 
-      {/* Language toggle */}
-      <div className="absolute top-5 right-5 z-10">
+      {/* Top controls */}
+      <div className="absolute top-5 right-5 z-10 flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            document.documentElement.classList.toggle("dark");
+          }}
+          className="gap-2 backdrop-blur-sm bg-card/60 border-border/50 hover:bg-card/80 transition-all"
+        >
+          <Sun size={14} className="dark:hidden" />
+          <Moon size={14} className="hidden dark:block" />
+        </Button>
         <Button
           variant="outline"
           size="sm"
