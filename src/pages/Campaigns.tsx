@@ -27,6 +27,7 @@ export default function Campaigns() {
   const [pageLoading, setPageLoading] = useState(true);
   const [editingMessage, setEditingMessage] = useState(false);
   const [editedMessage, setEditedMessage] = useState("");
+  const [sendOpen, setSendOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
