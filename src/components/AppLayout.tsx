@@ -11,6 +11,7 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/attendance", labelKey: "attendance", icon: CalendarCheck },
   { to: "/salary", labelKey: "salary", icon: IndianRupee },
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
+  { to: "/contacts", labelKey: "contacts", icon: BookUser },
   { to: "/business-profile", labelKey: "profile", icon: User },
 ];
 
