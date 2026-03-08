@@ -18,6 +18,7 @@ export default function CampaignHistory() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Campaign | null>(null);
+  const [sendCampaign, setSendCampaign] = useState<Campaign | null>(null);
 
   useEffect(() => {
     if (!user) return;
