@@ -172,7 +172,7 @@ export default function Campaigns() {
                     <h3 className="font-semibold font-display">{t("marketingMessage")}</h3>
                     <div className="flex gap-1">
                       {editingMessage ? (
-                        <Button variant="ghost" size="sm" onClick={() => setEditingMessage(false)} className="gap-1 text-green-600"><Check size={14} /> Done</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setEditingMessage(false)} className="gap-1 text-primary"><Check size={14} /> Done</Button>
                       ) : (
                         <Button variant="ghost" size="sm" onClick={() => { setEditedMessage(result.message); setEditingMessage(true); }} className="gap-1"><Pencil size={14} /> Edit</Button>
                       )}
