@@ -11,12 +11,20 @@ import {
   BarChart3, ArrowRight, TrendingUp, Clock, Sparkles
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import BusinessInsights from "@/components/dashboard/BusinessInsights";
 
 interface Stats {
   totalWorkers: number;
   attendancePercent: number;
   monthlySalary: number;
   totalCampaigns: number;
+}
+
+interface BusinessHealth {
+  khataBalance: number;
+  lowStockCount: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
 }
 
 function getGreeting(lang: string): string {
