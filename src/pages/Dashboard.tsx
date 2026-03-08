@@ -6,7 +6,10 @@ import AppLayout from "@/components/AppLayout";
 import Onboarding from "@/components/Onboarding";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Megaphone, Users, History, CalendarCheck, IndianRupee, BarChart3 } from "lucide-react";
+import {
+  Megaphone, Users, History, CalendarCheck, IndianRupee,
+  BarChart3, ArrowRight, TrendingUp, Clock, Sparkles
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface Stats {
@@ -14,6 +17,18 @@ interface Stats {
   attendancePercent: number;
   monthlySalary: number;
   totalCampaigns: number;
+}
+
+function getGreeting(lang: string): string {
+  const h = new Date().getHours();
+  if (lang === "hi") {
+    if (h < 12) return "सुप्रभात";
+    if (h < 17) return "नमस्कार";
+    return "शुभ संध्या";
+  }
+  if (h < 12) return "Good Morning";
+  if (h < 17) return "Good Afternoon";
+  return "Good Evening";
 }
 
 export default function Dashboard() {
@@ -79,10 +94,73 @@ export default function Dashboard() {
   });
 
   const statCards = [
-    { label: t("totalWorkers"), value: String(stats.totalWorkers), icon: Users, color: "text-primary" },
-    { label: t("todaysAttendance"), value: `${stats.attendancePercent}%`, icon: CalendarCheck, color: "text-emerald-500" },
-    { label: t("thisMonthSalary"), value: `₹${stats.monthlySalary.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-amber-500" },
-    { label: t("totalCampaigns"), value: String(stats.totalCampaigns), icon: BarChart3, color: "text-violet-500" },
+    {
+      label: t("totalWorkers"),
+      value: String(stats.totalWorkers),
+      icon: Users,
+      gradient: "from-primary/15 to-primary/5",
+      iconBg: "gradient-primary",
+      iconColor: "text-primary-foreground",
+      trend: stats.totalWorkers > 0 ? `${stats.totalWorkers} active` : "—",
+    },
+    {
+      label: t("todaysAttendance"),
+      value: `${stats.attendancePercent}%`,
+      icon: CalendarCheck,
+      gradient: "from-emerald-500/15 to-emerald-500/5",
+      iconBg: "bg-emerald-500",
+      iconColor: "text-white",
+      trend: stats.attendancePercent >= 80 ? "Great!" : stats.attendancePercent > 0 ? "Needs attention" : "—",
+    },
+    {
+      label: t("thisMonthSalary"),
+      value: `₹${stats.monthlySalary.toLocaleString("en-IN")}`,
+      icon: IndianRupee,
+      gradient: "from-amber-500/15 to-amber-500/5",
+      iconBg: "bg-amber-500",
+      iconColor: "text-white",
+      trend: lang === "hi" ? "इस माह" : "This month",
+    },
+    {
+      label: t("totalCampaigns"),
+      value: String(stats.totalCampaigns),
+      icon: BarChart3,
+      gradient: "from-violet-500/15 to-violet-500/5",
+      iconBg: "bg-violet-500",
+      iconColor: "text-white",
+      trend: stats.totalCampaigns > 0 ? `${stats.totalCampaigns} sent` : "—",
+    },
+  ];
+
+  const quickActions = [
+    {
+      to: "/campaign",
+      icon: Megaphone,
+      label: t("aiCampaigns"),
+      desc: lang === "hi" ? "AI से मार्केटिंग बनाएं" : "Create AI marketing",
+      gradient: "gradient-primary",
+    },
+    {
+      to: "/workers",
+      icon: Users,
+      label: t("workers"),
+      desc: lang === "hi" ? "टीम मैनेज करें" : "Manage your team",
+      gradient: "bg-secondary",
+    },
+    {
+      to: "/attendance",
+      icon: CalendarCheck,
+      label: t("attendance"),
+      desc: lang === "hi" ? "आज की हाज़िरी लगाएं" : "Mark today's attendance",
+      gradient: "bg-emerald-600",
+    },
+    {
+      to: "/campaign-history",
+      icon: History,
+      label: t("campaignHistory"),
+      desc: lang === "hi" ? "पिछले अभियान देखें" : "View past campaigns",
+      gradient: "bg-violet-600",
+    },
   ];
 
   if (needsOnboarding) {
@@ -91,63 +169,84 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="animate-fade-in">
+      <div className="animate-fade-in space-y-6 md:space-y-8">
         {loading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-9 w-48" />
-            <Skeleton className="h-5 w-64" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-8">
-              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          <div className="space-y-6">
+            <Skeleton className="h-32 w-full rounded-2xl" />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
             </div>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">
-              {shopName || t("welcome")}
-            </h1>
-            <p className="text-muted-foreground mb-6">{today}</p>
+            {/* Welcome Banner */}
+            <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8">
+              {/* Decorative circles */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+              <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full bg-white/5" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles size={18} className="text-primary-foreground/80" />
+                  <span className="text-primary-foreground/80 text-sm font-medium">{getGreeting(lang)} 👋</span>
+                </div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-primary-foreground font-display">
+                  {shopName || t("welcome")}
+                </h1>
+                <div className="flex items-center gap-2 mt-2">
+                  <Clock size={14} className="text-primary-foreground/60" />
+                  <p className="text-primary-foreground/70 text-sm">{today}</p>
+                </div>
+              </div>
+            </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {/* Stats Grid */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {statCards.map((s) => (
-                <Card key={s.label} className="border-border/50">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className={`rounded-lg bg-accent p-3 ${s.color}`}>
-                      <s.icon size={22} />
+                <Card key={s.label} className="group relative overflow-hidden border-border/40 hover:border-border transition-all duration-300 hover:shadow-md rounded-2xl">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-60`} />
+                  <CardContent className="relative p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`rounded-xl ${s.iconBg} p-2.5 shadow-sm`}>
+                        <s.icon size={20} className={s.iconColor} />
+                      </div>
+                      <TrendingUp size={16} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">{s.label}</p>
-                      <p className="text-2xl font-bold font-display">{s.value}</p>
-                    </div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{s.label}</p>
+                    <p className="text-2xl md:text-3xl font-extrabold font-display text-foreground">{s.value}</p>
+                    <p className="text-[11px] text-muted-foreground/70 mt-1">{s.trend}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-3xl">
-              <Link to="/campaign">
-                <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
-                    <Megaphone className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("aiCampaigns")}</span>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link to="/workers">
-                <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
-                    <Users className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("workers")}</span>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link to="/campaign-history">
-                <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
-                    <History className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("campaignHistory")}</span>
-                  </CardContent>
-                </Card>
-              </Link>
+            {/* Quick Actions */}
+            <div>
+              <h2 className="text-lg font-bold font-display text-foreground mb-4">
+                {lang === "hi" ? "तुरंत कार्रवाई" : "Quick Actions"}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {quickActions.map((action) => (
+                  <Link key={action.to} to={action.to}>
+                    <Card className="group border-border/40 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 rounded-2xl cursor-pointer">
+                      <CardContent className="flex items-center gap-4 p-4">
+                        <div className={`shrink-0 rounded-xl ${action.gradient} p-3 shadow-sm transition-transform duration-300 group-hover:scale-110`}>
+                          <action.icon size={20} className="text-primary-foreground" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-sm font-display text-foreground group-hover:text-primary transition-colors truncate">
+                            {action.label}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">{action.desc}</p>
+                        </div>
+                        <ArrowRight size={16} className="text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
             </div>
           </>
         )}
