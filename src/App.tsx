@@ -49,6 +49,7 @@ const App = () => (
               <Route path="/campaign" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
               <Route path="/campaign-history" element={<ProtectedRoute><CampaignHistory /></ProtectedRoute>} />
               <Route path="/campaigns" element={<Navigate to="/campaign" replace />} />
+              <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
               <Route path="/business-profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
               <Route path="*" element={<NotFound />} />
