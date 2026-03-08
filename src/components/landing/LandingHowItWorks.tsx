@@ -22,6 +22,7 @@ export default function LandingHowItWorks() {
       </p>
       <h2 className="reveal-card opacity-0 text-center font-display font-extrabold text-primary-foreground mb-2 sm:mb-3 text-2xl sm:text-3xl md:text-4xl">
         {t("gettingStartedEasy")}
+        <span className="block mx-auto mt-2 h-1 w-16 rounded-full bg-primary-foreground/40 animate-[scale-in_0.6s_ease-out_forwards] origin-center" />
       </h2>
       <p className="reveal-card opacity-0 text-center text-primary-foreground/70 max-w-[480px] mx-auto mb-8 sm:mb-12 leading-relaxed text-sm sm:text-base px-2">
         {t("stepsSubtext")}
