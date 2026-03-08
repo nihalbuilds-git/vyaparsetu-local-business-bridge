@@ -127,6 +127,10 @@ export default function Campaigns() {
             </Card>
             {result && (
               <div className="space-y-4 animate-fade-in">
+                {/* Send Campaign Button */}
+                <Button onClick={() => setSendOpen(true)} className="w-full gap-2" variant="outline" size="lg">
+                  <Send size={18} /> {t("sendCampaign")}
+                </Button>
                 {/* Poster */}
                 <Card>
                   <CardContent className="p-6">
