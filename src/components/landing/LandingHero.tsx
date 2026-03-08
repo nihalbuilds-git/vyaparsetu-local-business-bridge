@@ -8,7 +8,7 @@ export default function LandingHero() {
   const { t } = useI18n();
 
   return (
-    <section className="relative min-h-[50vh] flex flex-col items-center justify-center text-center px-[5%] pt-28 pb-12 overflow-hidden">
+    <section className="relative min-h-[45vh] sm:min-h-[50vh] flex flex-col items-center justify-center text-center px-4 sm:px-[5%] pt-24 sm:pt-28 pb-10 sm:pb-12 overflow-hidden">
       {/* Background radial gradients */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0" style={{
@@ -21,29 +21,29 @@ export default function LandingHero() {
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
-        <h1 className="font-display font-extrabold text-primary leading-none tracking-tight animate-fade-up"
-          style={{ fontSize: "clamp(3.5rem, 12vw, 8rem)", letterSpacing: "-0.02em" }}
+        <h1 className="font-display font-extrabold text-primary leading-none tracking-tight animate-fade-up text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+          style={{ letterSpacing: "-0.02em" }}
         >
           VyaparSetu
         </h1>
 
-        <p className="mt-6 max-w-lg text-muted-foreground text-base md:text-lg leading-relaxed animate-fade-up"
+        <p className="mt-4 sm:mt-6 max-w-md sm:max-w-lg text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed animate-fade-up px-2"
           style={{ animationDelay: "0.2s" }}
         >
           {t("heroTagline")}
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.4s" }}>
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto animate-fade-up px-4 sm:px-0" style={{ animationDelay: "0.4s" }}>
           <Button
             onClick={() => navigate("/login")}
-            className="gradient-primary text-primary-foreground gap-2 px-8 py-3 text-base rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+            className="gradient-primary text-primary-foreground gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 w-full sm:w-auto"
           >
             {t("getStarted")} <ArrowRight size={18} />
           </Button>
           <Button
             variant="outline"
             onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-            className="rounded-full px-7 py-3 text-base font-semibold border-primary/30 text-primary hover:bg-accent transition-all"
+            className="rounded-full px-6 sm:px-7 py-3 text-sm sm:text-base font-semibold border-primary/30 text-primary hover:bg-accent transition-all w-full sm:w-auto"
           >
             {t("navFeatures")}
           </Button>
