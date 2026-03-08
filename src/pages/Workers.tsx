@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ interface Worker {
 export default function Workers() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useI18n();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -55,9 +57,9 @@ export default function Workers() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (form.daily_salary && (isNaN(Number(form.daily_salary)) || Number(form.daily_salary) < 0)) e.daily_salary = "Enter a valid salary";
-    if (form.phone && !/^\d{10}$/.test(form.phone.replace(/\s/g, ""))) e.phone = "Enter a 10-digit phone number";
+    if (!form.name.trim()) e.name = t("nameRequired");
+    if (form.daily_salary && (isNaN(Number(form.daily_salary)) || Number(form.daily_salary) < 0)) e.daily_salary = t("validSalary");
+    if (form.phone && !/^\d{10}$/.test(form.phone.replace(/\s/g, ""))) e.phone = t("validPhone");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -68,7 +70,7 @@ export default function Workers() {
     const path = `${user.id}/${workerId}.${ext}`;
     const { error } = await supabase.storage.from("worker-avatars").upload(path, avatarFile, { upsert: true });
     if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      toast({ title: t("uploadFailed"), description: error.message, variant: "destructive" });
       return null;
     }
     const { data: urlData } = supabase.storage.from("worker-avatars").getPublicUrl(path);
@@ -93,10 +95,10 @@ export default function Workers() {
         if (url) payload.avatar_url = url;
       }
       const { error } = await supabase.from("workers").update(payload as any).eq("id", editId);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
+      if (error) { toast({ title: t("error"), description: error.message, variant: "destructive" }); setUploading(false); return; }
     } else {
       const { data, error } = await supabase.from("workers").insert(payload as any).select("id").single();
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); setUploading(false); return; }
+      if (error) { toast({ title: t("error"), description: error.message, variant: "destructive" }); setUploading(false); return; }
       if (data && avatarFile) {
         const url = await uploadAvatar(data.id);
         if (url) {
@@ -104,7 +106,7 @@ export default function Workers() {
         }
       }
     }
-    toast({ title: editId ? "Worker updated" : "Worker added" });
+    toast({ title: editId ? t("workerUpdated") : t("workerAdded") });
     resetForm();
     setUploading(false);
     load();
@@ -130,8 +132,8 @@ export default function Workers() {
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("workers").delete().eq("id", id);
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "Worker removed" });
+    if (error) { toast({ title: t("error"), description: error.message, variant: "destructive" }); return; }
+    toast({ title: t("workerRemoved") });
     load();
   };
 
@@ -139,7 +141,7 @@ export default function Workers() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Max 2MB allowed", variant: "destructive" });
+      toast({ title: t("fileTooLarge"), description: t("maxFileSize"), variant: "destructive" });
       return;
     }
     setAvatarFile(file);
@@ -153,17 +155,16 @@ export default function Workers() {
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Workers</h1>
-            <p className="text-muted-foreground">Manage your team</p>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">{t("workers")}</h1>
+            <p className="text-muted-foreground">{t("manageTeam")}</p>
           </div>
           <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(true); }}>
             <DialogTrigger asChild>
-              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> Add Worker</Button>
+              <Button className="gradient-primary text-primary-foreground gap-2"><Plus size={16} /> {t("addWorker")}</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle className="font-display">{editId ? "Edit" : "Add"} Worker</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle className="font-display">{editId ? t("editWorker") : t("addWorker")}</DialogTitle></DialogHeader>
               <div className="space-y-4">
-                {/* Avatar upload */}
                 <div className="flex flex-col items-center gap-2">
                   <div className="relative cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
                     <Avatar className="h-20 w-20 border-2 border-border">
@@ -180,27 +181,27 @@ export default function Workers() {
                     </div>
                   </div>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                  <p className="text-xs text-muted-foreground">Tap to upload photo</p>
+                  <p className="text-xs text-muted-foreground">{t("tapToUpload")}</p>
                 </div>
 
                 <div>
-                  <Label>Name *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Worker's name" />
+                  <Label>{t("name")} *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("workerNamePlaceholder")} />
                   {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <Label>Phone</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit number" />
+                  <Label>{t("phone")}</Label>
+                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("phonePlaceholder10")} />
                   {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                 </div>
-                <div><Label>Role</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Helper, Driver" /></div>
+                <div><Label>{t("role")}</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder={t("rolePlaceholder")} /></div>
                 <div>
-                  <Label>Daily Salary (₹)</Label>
+                  <Label>{t("dailySalaryRs")}</Label>
                   <Input type="number" value={form.daily_salary} onChange={(e) => setForm({ ...form, daily_salary: e.target.value })} placeholder="500" />
                   {errors.daily_salary && <p className="text-xs text-destructive mt-1">{errors.daily_salary}</p>}
                 </div>
                 <Button onClick={handleSave} disabled={uploading} className="w-full gradient-primary text-primary-foreground">
-                  {uploading ? "Saving..." : "Save"}
+                  {uploading ? t("saving") : t("save")}
                 </Button>
               </div>
             </DialogContent>
@@ -210,17 +211,11 @@ export default function Workers() {
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-4 space-y-3">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-10 w-full rounded-lg" />
-                </CardContent>
-              </Card>
+              <Card key={i}><CardContent className="p-4 space-y-3"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full rounded-lg" /></CardContent></Card>
             ))}
           </div>
         ) : workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>No workers added yet</p></CardContent></Card>
+          <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground"><UsersIcon size={40} className="mb-3 opacity-40" /><p>{t("noWorkersYet")}</p></CardContent></Card>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {workers.map((w) => (
@@ -229,17 +224,13 @@ export default function Workers() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-border">
-                        {w.avatar_url ? (
-                          <AvatarImage src={w.avatar_url} alt={w.name} />
-                        ) : (
-                          <AvatarFallback className="bg-accent text-accent-foreground text-xs font-display">
-                            {getInitials(w.name)}
-                          </AvatarFallback>
+                        {w.avatar_url ? <AvatarImage src={w.avatar_url} alt={w.name} /> : (
+                          <AvatarFallback className="bg-accent text-accent-foreground text-xs font-display">{getInitials(w.name)}</AvatarFallback>
                         )}
                       </Avatar>
                       <div>
                         <h3 className="font-semibold font-display">{w.name}</h3>
-                        <p className="text-sm text-muted-foreground">{w.role || "No role"}</p>
+                        <p className="text-sm text-muted-foreground">{w.role || t("noRole")}</p>
                         {w.phone && <p className="text-sm text-muted-foreground">{w.phone}</p>}
                       </div>
                     </div>
@@ -251,23 +242,19 @@ export default function Workers() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Remove Worker?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{w.name}"? This will also remove their attendance records. This action cannot be undone.
-                            </AlertDialogDescription>
+                            <AlertDialogTitle>{t("removeWorker")}</AlertDialogTitle>
+                            <AlertDialogDescription>{t("removeWorkerDesc", { name: w.name })}</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Delete
-                            </AlertDialogAction>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t("delete")}</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-accent px-3 py-2">
-                    <span className="text-xs text-muted-foreground">Daily Salary</span>
+                    <span className="text-xs text-muted-foreground">{t("dailySalary")}</span>
                     <span className="font-semibold text-accent-foreground">₹{Number(w.daily_salary).toLocaleString("en-IN")}</span>
                   </div>
                 </CardContent>

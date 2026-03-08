@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Phone, ShieldCheck, Mail, Lock } from "lucide-react";
+import { Phone, ShieldCheck, Mail, Lock, Globe } from "lucide-react";
 
 type AuthMode = "phone" | "email";
 type PhoneStep = "input" | "otp";
@@ -25,6 +26,7 @@ export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, lang, setLang } = useI18n();
 
   useEffect(() => {
     if (user) navigate("/dashboard");
@@ -41,7 +43,7 @@ export default function Login() {
     e.preventDefault();
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10) {
-      toast({ title: "Enter a valid phone number", variant: "destructive" });
+      toast({ title: t("validPhoneNumber"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -50,9 +52,9 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOtp({ phone: formatted });
       if (error) throw error;
       setPhoneStep("otp");
-      toast({ title: "OTP sent!", description: `Check SMS on ${formatted}` });
+      toast({ title: t("otpSent"), description: t("checkSms", { phone: formatted }) });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export default function Login() {
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length < 6) {
-      toast({ title: "Enter a valid 6-digit OTP", variant: "destructive" });
+      toast({ title: t("validOtp"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -71,7 +73,7 @@ export default function Login() {
       if (error) throw error;
       navigate("/dashboard");
     } catch (err: any) {
-      toast({ title: "Verification failed", description: err.message, variant: "destructive" });
+      toast({ title: t("verificationFailed"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ export default function Login() {
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast({ title: "Fill in all fields", variant: "destructive" });
+      toast({ title: t("fillAllFields"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -88,7 +90,7 @@ export default function Login() {
       if (emailStep === "signup") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast({ title: "Account created!", description: "Check your email to verify, then log in." });
+        toast({ title: t("accountCreated"), description: t("verifyEmail") });
         setEmailStep("login");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -96,7 +98,7 @@ export default function Login() {
         navigate("/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -110,7 +112,7 @@ export default function Login() {
       });
       if (error) throw error;
     } catch (err: any) {
-      toast({ title: "Google sign-in failed", description: err.message, variant: "destructive" });
+      toast({ title: t("googleSignInFailed"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -118,7 +120,7 @@ export default function Login() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      toast({ title: "Enter your email first", variant: "destructive" });
+      toast({ title: t("enterEmailFirst"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -127,9 +129,9 @@ export default function Login() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast({ title: "Reset link sent!", description: "Check your email inbox." });
+      toast({ title: t("resetLinkSent"), description: t("checkInbox") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -137,21 +139,29 @@ export default function Login() {
 
   const heading =
     mode === "phone"
-      ? phoneStep === "input" ? "Sign in with Phone" : "Verify OTP"
-      : emailStep === "login" ? "Log in to your account" : "Create your account";
+      ? phoneStep === "input" ? t("signInWithPhone") : t("verifyOtp")
+      : emailStep === "login" ? t("logIn") : t("createAccount");
 
   const subtext =
     mode === "phone"
-      ? phoneStep === "input" ? "We'll send a 6-digit OTP via SMS" : "Enter the code sent to your phone"
-      : emailStep === "login" ? "Don't have an account?" : "Already have an account?";
+      ? phoneStep === "input" ? t("otpSmsHint") : t("enterCodeHint")
+      : emailStep === "login" ? t("dontHaveAccount") : t("alreadyHaveAccount");
 
   const subtextAction =
     mode === "email"
-      ? emailStep === "login" ? "Sign up" : "Sign in"
+      ? emailStep === "login" ? t("signUp") : t("signIn")
       : undefined;
 
   return (
     <main className="w-full min-h-screen flex flex-col items-center justify-center bg-background px-4">
+      {/* Language toggle */}
+      <div className="absolute top-4 right-4">
+        <Button variant="outline" size="sm" onClick={() => setLang(lang === "en" ? "hi" : "en")} className="gap-2">
+          <Globe size={14} />
+          {lang === "en" ? "हिन्दी" : "English"}
+        </Button>
+      </div>
+
       <div className="max-w-sm w-full space-y-8">
         {/* Logo & heading */}
         <div className="text-center">
@@ -182,14 +192,14 @@ export default function Login() {
             onClick={() => setMode("email")}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${mode === "email" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
           >
-            <Mail size={14} className="inline mr-1.5 -mt-0.5" /> Email
+            <Mail size={14} className="inline mr-1.5 -mt-0.5" /> {t("email")}
           </button>
           <button
             type="button"
             onClick={() => setMode("phone")}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${mode === "phone" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
           >
-            <Phone size={14} className="inline mr-1.5 -mt-0.5" /> Phone OTP
+            <Phone size={14} className="inline mr-1.5 -mt-0.5" /> {t("phoneOtp")}
           </button>
         </div>
 
@@ -197,38 +207,20 @@ export default function Login() {
         {mode === "email" && (
           <form onSubmit={handleEmail} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11"
-              />
+              <Label htmlFor="email" className="text-foreground font-medium">{t("email")}</Label>
+              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-11"
-              />
+              <Label htmlFor="password" className="text-foreground font-medium">{t("password")}</Label>
+              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="h-11" />
             </div>
             <Button type="submit" className="w-full h-11" disabled={loading}>
-              {loading ? "Please wait..." : emailStep === "login" ? "Sign in" : "Create Account"}
+              {loading ? t("pleaseWait") : emailStep === "login" ? t("signIn") : t("createAccount")}
             </Button>
             {emailStep === "login" && (
               <div className="text-center">
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-primary hover:text-primary/80"
-                >
-                  Forgot password?
+                <button type="button" onClick={handleForgotPassword} className="text-sm text-primary hover:text-primary/80">
+                  {t("forgotPassword")}
                 </button>
               </div>
             )}
@@ -239,19 +231,11 @@ export default function Login() {
         {mode === "phone" && phoneStep === "input" && (
           <form onSubmit={sendOtp} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-foreground font-medium">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="Enter 10-digit mobile number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="h-11"
-                maxLength={15}
-              />
+              <Label htmlFor="phone" className="text-foreground font-medium">{t("phoneNumber")}</Label>
+              <Input id="phone" type="tel" placeholder={t("phonePlaceholder")} value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11" maxLength={15} />
             </div>
             <Button type="submit" className="w-full h-11" disabled={loading}>
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {loading ? t("sendingOtp") : t("sendOtp")}
             </Button>
           </form>
         )}
@@ -260,30 +244,17 @@ export default function Login() {
         {mode === "phone" && phoneStep === "otp" && (
           <form onSubmit={verifyOtp} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="otp" className="text-foreground font-medium">Verification Code</Label>
+              <Label htmlFor="otp" className="text-foreground font-medium">{t("verificationCode")}</Label>
               <div className="relative">
                 <ShieldCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="otp"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="pl-10 text-center text-lg tracking-[0.5em] font-mono h-11"
-                  maxLength={6}
-                />
+                <Input id="otp" type="text" inputMode="numeric" placeholder={t("otpPlaceholder")} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} className="pl-10 text-center text-lg tracking-[0.5em] font-mono h-11" maxLength={6} />
               </div>
             </div>
             <Button type="submit" className="w-full h-11" disabled={loading}>
-              {loading ? "Verifying..." : "Verify & Login"}
+              {loading ? t("verifying") : t("verifyAndLogin")}
             </Button>
-            <button
-              type="button"
-              onClick={() => { setPhoneStep("input"); setOtp(""); }}
-              className="w-full text-center text-sm text-muted-foreground hover:text-primary"
-            >
-              ← Change phone number
+            <button type="button" onClick={() => { setPhoneStep("input"); setOtp(""); }} className="w-full text-center text-sm text-muted-foreground hover:text-primary">
+              {t("changePhone")}
             </button>
           </form>
         )}
@@ -292,7 +263,7 @@ export default function Login() {
         <div className="relative">
           <span className="block w-full h-px bg-border" />
           <p className="inline-block w-fit text-sm bg-background px-2 text-muted-foreground absolute -top-2.5 inset-x-0 mx-auto">
-            Or continue with
+            {t("orContinueWith")}
           </p>
         </div>
 
@@ -310,7 +281,7 @@ export default function Login() {
               <path d="M123.6 328.1c-10.8-32.1-10.8-66.9 0-99l-89.6-68.9c-39.1 77.6-39.1 168.3 0 245.9l89.6-68z" fill="#FBBC05" />
               <path d="M272 107.7c37.4-.6 73.5 13.2 101.1 38.7l75.4-75.4C403.4 24.5 341.4 0 272 0 168.5 0 77.7 63.8 34 159.2l89.6 68.9C144.4 154.3 202.9 107.7 272 107.7z" fill="#EA4335" />
             </svg>
-            Continue with Google
+            {t("continueWithGoogle")}
           </button>
         </div>
       </div>

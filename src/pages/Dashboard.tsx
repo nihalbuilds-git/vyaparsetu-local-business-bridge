@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import Onboarding from "@/components/Onboarding";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +18,7 @@ interface Stats {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t, lang } = useI18n();
   const [shopName, setShopName] = useState("");
   const [loading, setLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -69,7 +71,7 @@ export default function Dashboard() {
     load();
   }, [user]);
 
-  const today = new Date().toLocaleDateString("en-IN", {
+  const today = new Date().toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -77,10 +79,10 @@ export default function Dashboard() {
   });
 
   const statCards = [
-    { label: "Total Workers", value: String(stats.totalWorkers), icon: Users, color: "text-primary" },
-    { label: "Today's Attendance", value: `${stats.attendancePercent}%`, icon: CalendarCheck, color: "text-emerald-500" },
-    { label: "This Month Salary", value: `₹${stats.monthlySalary.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-amber-500" },
-    { label: "Total Campaigns", value: String(stats.totalCampaigns), icon: BarChart3, color: "text-violet-500" },
+    { label: t("totalWorkers"), value: String(stats.totalWorkers), icon: Users, color: "text-primary" },
+    { label: t("todaysAttendance"), value: `${stats.attendancePercent}%`, icon: CalendarCheck, color: "text-emerald-500" },
+    { label: t("thisMonthSalary"), value: `₹${stats.monthlySalary.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-amber-500" },
+    { label: t("totalCampaigns"), value: String(stats.totalCampaigns), icon: BarChart3, color: "text-violet-500" },
   ];
 
   if (needsOnboarding) {
@@ -95,24 +97,16 @@ export default function Dashboard() {
             <Skeleton className="h-9 w-48" />
             <Skeleton className="h-5 w-64" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-8">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-28 rounded-xl" />
-              ))}
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-3xl mt-6">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-32 rounded-xl" />
-              ))}
+              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
             </div>
           </div>
         ) : (
           <>
             <h1 className="text-2xl md:text-3xl font-bold font-display mb-1">
-              {shopName ? shopName : "Welcome"}
+              {shopName || t("welcome")}
             </h1>
             <p className="text-muted-foreground mb-6">{today}</p>
 
-            {/* Stats Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
               {statCards.map((s) => (
                 <Card key={s.label} className="border-border/50">
@@ -129,13 +123,12 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Quick Links */}
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-3xl">
               <Link to="/campaign">
                 <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
                     <Megaphone className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">AI Campaigns</span>
+                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("aiCampaigns")}</span>
                   </CardContent>
                 </Card>
               </Link>
@@ -143,7 +136,7 @@ export default function Dashboard() {
                 <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
                     <Users className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Workers</span>
+                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("workers")}</span>
                   </CardContent>
                 </Card>
               </Link>
@@ -151,7 +144,7 @@ export default function Dashboard() {
                 <Card className="border-border/50 hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="flex flex-col items-center justify-center gap-3 p-8">
                     <History className="text-primary" size={36} />
-                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">Campaign History</span>
+                    <span className="text-lg font-bold font-display group-hover:text-primary transition-colors">{t("campaignHistory")}</span>
                   </CardContent>
                 </Card>
               </Link>

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,20 +16,13 @@ import { cn } from "@/lib/utils";
 
 type Status = "present" | "absent" | "half_day";
 
-interface Worker {
-  id: string;
-  name: string;
-  role: string | null;
-}
-
-interface AttendanceRecord {
-  worker_id: string;
-  status: Status;
-}
+interface Worker { id: string; name: string; role: string | null; }
+interface AttendanceRecord { worker_id: string; status: Status; }
 
 export default function Attendance() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<Record<string, Status>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -71,14 +65,14 @@ export default function Attendance() {
         await supabase.from("attendance").insert({ worker_id, status, date, user_id: user.id });
       }
     }
-    toast({ title: "Attendance saved successfully!" });
+    toast({ title: t("attendanceSaved") });
     setSaving(false);
   };
 
   const statusConfig: Record<Status, { icon: typeof Check; label: string; className: string }> = {
-    present: { icon: Check, label: "Present", className: "bg-success text-success-foreground" },
-    absent: { icon: X, label: "Absent", className: "bg-destructive text-destructive-foreground" },
-    half_day: { icon: Clock, label: "Half Day", className: "bg-warning text-warning-foreground" },
+    present: { icon: Check, label: t("present"), className: "bg-success text-success-foreground" },
+    absent: { icon: X, label: t("absent"), className: "bg-destructive text-destructive-foreground" },
+    half_day: { icon: Clock, label: t("halfDay"), className: "bg-warning text-warning-foreground" },
   };
 
   return (
@@ -86,47 +80,32 @@ export default function Attendance() {
       <div className="animate-fade-in">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">Attendance</h1>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">{t("attendance")}</h1>
             <p className="text-muted-foreground">
-              {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-              {isToday && " — Today"}
+              {selectedDate.toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {isToday && ` — ${t("today")}`}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" asChild className="gap-2">
-              <Link to="/attendance-calendar"><CalendarIcon size={16} /> Calendar View</Link>
+              <Link to="/attendance-calendar"><CalendarIcon size={16} /> {t("calendarView")}</Link>
             </Button>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className={cn("gap-2", !isToday && "border-primary text-primary")}>
                   <CalendarIcon size={16} />
-                  {isToday ? "Today" : format(selectedDate, "dd MMM yyyy")}
+                  {isToday ? t("today") : format(selectedDate, "dd MMM yyyy")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(d) => d && setSelectedDate(d)}
-                  disabled={(d) => d > new Date()}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
+                <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} disabled={(d) => d > new Date()} initialFocus className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
-            <Button
-              variant="outline"
-              onClick={() => {
-                const all: Record<string, Status> = {};
-                workers.forEach((w) => (all[w.id] = "present"));
-                setAttendance(all);
-              }}
-              disabled={workers.length === 0}
-            >
-              Mark All Present
+            <Button variant="outline" onClick={() => { const all: Record<string, Status> = {}; workers.forEach((w) => (all[w.id] = "present")); setAttendance(all); }} disabled={workers.length === 0}>
+              {t("markAllPresent")}
             </Button>
             <Button onClick={save} disabled={saving} className="gradient-primary text-primary-foreground">
-              {saving ? "Saving..." : "Save"}
+              {saving ? t("saving") : t("save")}
             </Button>
           </div>
         </div>
@@ -134,19 +113,11 @@ export default function Attendance() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-28" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                  <Skeleton className="h-7 w-20 rounded-full" />
-                </CardContent>
-              </Card>
+              <Card key={i}><CardContent className="flex items-center justify-between p-4"><div className="space-y-2"><Skeleton className="h-5 w-28" /><Skeleton className="h-4 w-20" /></div><Skeleton className="h-7 w-20 rounded-full" /></CardContent></Card>
             ))}
           </div>
         ) : workers.length === 0 ? (
-          <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">Add workers first to mark attendance</CardContent></Card>
+          <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">{t("addWorkersFirst")}</CardContent></Card>
         ) : (
           <div className="space-y-3">
             {workers.map((w) => {
@@ -157,14 +128,14 @@ export default function Attendance() {
                   <CardContent className="flex items-center justify-between p-4">
                     <div>
                       <h3 className="font-semibold font-display">{w.name}</h3>
-                      <p className="text-sm text-muted-foreground">{w.role || "Worker"}</p>
+                      <p className="text-sm text-muted-foreground">{w.role || t("worker")}</p>
                     </div>
                     {config ? (
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}>
                         <config.icon size={12} /> {config.label}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Tap to set</span>
+                      <span className="text-xs text-muted-foreground">{t("tapToSet")}</span>
                     )}
                   </CardContent>
                 </Card>
