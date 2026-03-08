@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Copy, Download, Share2, Image as ImageIcon } from "lucide-react";
+import { Sparkles, Copy, Download, Share2, Image as ImageIcon, Pencil, Check } from "lucide-react";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
 
@@ -24,6 +24,8 @@ export default function Campaigns() {
   const [loading, setLoading] = useState(false);
   const [posterLoading, setPosterLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [editingMessage, setEditingMessage] = useState(false);
+  const [editedMessage, setEditedMessage] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -168,9 +170,30 @@ export default function Campaigns() {
                 <Card><CardContent className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold font-display">{t("marketingMessage")}</h3>
-                    <Button variant="ghost" size="sm" onClick={() => copy(result.message)} className="gap-1"><Copy size={14} /> {t("copy")}</Button>
+                    <div className="flex gap-1">
+                      {editingMessage ? (
+                        <Button variant="ghost" size="sm" onClick={() => setEditingMessage(false)} className="gap-1 text-primary"><Check size={14} /> Done</Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" onClick={() => { setEditedMessage(result.message); setEditingMessage(true); }} className="gap-1"><Pencil size={14} /> Edit</Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => copy(editingMessage ? editedMessage : result.message)} className="gap-1"><Copy size={14} /> {t("copy")}</Button>
+                    </div>
                   </div>
-                  <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+                  {editingMessage ? (
+                    <Textarea
+                      value={editedMessage}
+                      onChange={(e) => {
+                        const val = e.target.value.slice(0, 1000);
+                        setEditedMessage(val);
+                        setResult({ ...result, message: val });
+                      }}
+                      rows={6}
+                      className="text-sm"
+                      maxLength={1000}
+                    />
+                  ) : (
+                    <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{result.message}</div>
+                  )}
                 </CardContent></Card>
 
                 {/* Image Prompt */}
