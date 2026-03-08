@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { I18nProvider } from "@/lib/i18n";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
@@ -28,31 +29,33 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/workers" element={<ProtectedRoute><Workers /></ProtectedRoute>} />
-            <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-            <Route path="/attendance-calendar" element={<ProtectedRoute><AttendanceCalendar /></ProtectedRoute>} />
-            <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
-            <Route path="/campaign" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-            <Route path="/campaign-history" element={<ProtectedRoute><CampaignHistory /></ProtectedRoute>} />
-            <Route path="/campaigns" element={<Navigate to="/campaign" replace />} />
-            <Route path="/business-profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <I18nProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/workers" element={<ProtectedRoute><Workers /></ProtectedRoute>} />
+              <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+              <Route path="/attendance-calendar" element={<ProtectedRoute><AttendanceCalendar /></ProtectedRoute>} />
+              <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
+              <Route path="/campaign" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+              <Route path="/campaign-history" element={<ProtectedRoute><CampaignHistory /></ProtectedRoute>} />
+              <Route path="/campaigns" element={<Navigate to="/campaign" replace />} />
+              <Route path="/business-profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </I18nProvider>
   </QueryClientProvider>
 );
 

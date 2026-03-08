@@ -1,27 +1,31 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut } from "lucide-react";
+import { useI18n, type TranslationKey } from "@/lib/i18n";
+import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/workers", label: "Workers", icon: Users },
-  { to: "/attendance", label: "Attendance", icon: CalendarCheck },
-  { to: "/salary", label: "Salary", icon: IndianRupee },
-  { to: "/campaign", label: "AI Campaigns", icon: Megaphone },
-  { to: "/business-profile", label: "Profile", icon: User },
+const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashboard }[] = [
+  { to: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
+  { to: "/workers", labelKey: "workers", icon: Users },
+  { to: "/attendance", labelKey: "attendance", icon: CalendarCheck },
+  { to: "/salary", labelKey: "salary", icon: IndianRupee },
+  { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
+  { to: "/business-profile", labelKey: "profile", icon: User },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { t, lang, setLang } = useI18n();
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
   };
+
+  const toggleLang = () => setLang(lang === "en" ? "hi" : "en");
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -34,7 +38,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <span className="text-xl font-bold text-secondary-foreground font-display">VyaparSetu</span>
         </div>
         <nav className="flex-1 space-y-1">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, labelKey, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -45,14 +49,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               }`}
             >
               <Icon size={18} />
-              {label}
+              {t(labelKey)}
             </Link>
           ))}
         </nav>
-        <Button variant="ghost" onClick={handleSignOut} className="justify-start gap-3 text-sidebar-foreground hover:text-destructive mt-auto">
-          <LogOut size={18} />
-          Sign Out
-        </Button>
+        <div className="space-y-1 mt-auto">
+          <Button variant="ghost" onClick={toggleLang} className="justify-start gap-3 text-sidebar-foreground w-full">
+            <Globe size={18} />
+            {lang === "en" ? "हिन्दी" : "English"}
+          </Button>
+          <Button variant="ghost" onClick={handleSignOut} className="justify-start gap-3 text-sidebar-foreground hover:text-destructive w-full">
+            <LogOut size={18} />
+            {t("signOut")}
+          </Button>
+        </div>
       </aside>
 
       {/* Main content */}
@@ -65,14 +75,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <span className="font-bold font-display">VyaparSetu</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut size={16} />
-          </Button>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={toggleLang}>
+              <Globe size={16} />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut size={16} />
+            </Button>
+          </div>
         </header>
 
         {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card">
-          {navItems.slice(0, 5).map(({ to, label, icon: Icon }) => (
+          {navItems.slice(0, 5).map(({ to, labelKey, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -81,7 +96,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               }`}
             >
               <Icon size={18} />
-              {label}
+              {t(labelKey)}
             </Link>
           ))}
         </nav>
