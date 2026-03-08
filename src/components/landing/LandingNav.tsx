@@ -2,13 +2,23 @@ import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { Globe, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export default function LandingNav() {
   const navigate = useNavigate();
   const { t, lang, setLang } = useI18n();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[5%] py-4 bg-background/85 backdrop-blur-xl border-b border-border">
+    <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[5%] py-4 backdrop-blur-xl border-b transition-all duration-300 ${
+      scrolled ? "bg-background/95 border-border shadow-sm" : "bg-background/60 border-transparent"
+    }`}>
       <a href="#" className="flex items-center gap-2.5 no-underline" onClick={(e) => e.preventDefault()}>
         <div className="w-[38px] h-[38px] rounded-[10px] gradient-primary grid place-items-center shadow-lg">
           <span className="font-display font-extrabold text-primary-foreground text-lg">V</span>

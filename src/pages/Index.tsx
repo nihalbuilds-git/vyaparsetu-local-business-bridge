@@ -18,7 +18,7 @@ export default function Index() {
   }, [user, loading, navigate]);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden scroll-smooth">
       <LandingNav />
       <LandingHero />
       <LandingFeatures />

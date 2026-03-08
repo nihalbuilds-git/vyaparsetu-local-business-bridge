@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { useEffect, useRef } from "react";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 const testimonials = [
   { textKey: "testimonial1" as const, nameKey: "testimonial1Name" as const, roleKey: "testimonial1Role" as const, initial: "R" },
@@ -9,34 +9,17 @@ const testimonials = [
 
 export default function LandingTestimonials() {
   const { t } = useI18n();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-fade-up-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    const els = sectionRef.current?.querySelectorAll(".reveal-card");
-    els?.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  const sectionRef = useScrollReveal<HTMLElement>();
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-24 px-[5%] max-w-[1100px] mx-auto">
-      <p className="text-center text-xs font-bold tracking-[0.15em] uppercase text-primary mb-3 reveal-card opacity-0">
+      <p className="reveal-card opacity-0 text-center text-xs font-bold tracking-[0.15em] uppercase text-primary mb-3">
         {t("whatPeopleSay")}
       </p>
-      <h2 className="text-center font-display font-extrabold text-foreground mb-3 reveal-card opacity-0" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}>
+      <h2 className="reveal-card opacity-0 text-center font-display font-extrabold text-foreground mb-3" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}>
         {t("realStories")}
       </h2>
-      <p className="text-center text-muted-foreground max-w-[480px] mx-auto mb-14 leading-relaxed reveal-card opacity-0">
+      <p className="reveal-card opacity-0 text-center text-muted-foreground max-w-[480px] mx-auto mb-14 leading-relaxed">
         {t("testimonialSubtext")}
       </p>
 
@@ -44,8 +27,7 @@ export default function LandingTestimonials() {
         {testimonials.map((item, idx) => (
           <div
             key={idx}
-            className="reveal-card opacity-0 bg-card border border-border rounded-[20px] p-7 transition-all"
-            style={{ transitionDelay: `${idx * 0.05}s` }}
+            className="reveal-card opacity-0 bg-card border border-border rounded-[20px] p-7 transition-all hover:-translate-y-1 hover:shadow-lg"
           >
             <div className="text-primary text-base mb-3">★★★★★</div>
             <p className="text-sm text-foreground leading-relaxed mb-5 italic">"{t(item.textKey)}"</p>
