@@ -159,11 +159,39 @@ export default function Dashboard() {
 
   const quickActions = [
     {
+      to: "/attendance",
+      icon: CalendarCheck,
+      label: lang === "hi" ? "हाज़िरी लगाएं" : "Mark Attendance",
+      desc: lang === "hi" ? "आज की हाज़िरी एक क्लिक में" : "One tap daily attendance",
+      gradient: "bg-emerald-600",
+    },
+    {
+      to: "/invoices",
+      icon: FileText,
+      label: lang === "hi" ? "बिल बनाएं" : "Create Invoice",
+      desc: lang === "hi" ? "तुरंत बिल बनाएं" : "Generate invoice instantly",
+      gradient: "gradient-primary",
+    },
+    {
+      to: "/khata",
+      icon: CreditCard,
+      label: lang === "hi" ? "खाता एंट्री" : "Khata Entry",
+      desc: lang === "hi" ? "उधार / जमा लिखें" : "Record credit / debit",
+      gradient: "bg-amber-600",
+    },
+    {
+      to: "/expenses",
+      icon: Wallet,
+      label: lang === "hi" ? "खर्चा लिखें" : "Add Expense",
+      desc: lang === "hi" ? "आय / खर्च दर्ज करें" : "Track income & expenses",
+      gradient: "bg-red-600",
+    },
+    {
       to: "/campaign",
       icon: Megaphone,
       label: t("aiCampaigns"),
       desc: lang === "hi" ? "AI से मार्केटिंग बनाएं" : "Create AI marketing",
-      gradient: "gradient-primary",
+      gradient: "bg-violet-600",
     },
     {
       to: "/workers",
@@ -171,20 +199,6 @@ export default function Dashboard() {
       label: t("workers"),
       desc: lang === "hi" ? "टीम मैनेज करें" : "Manage your team",
       gradient: "bg-secondary",
-    },
-    {
-      to: "/attendance",
-      icon: CalendarCheck,
-      label: t("attendance"),
-      desc: lang === "hi" ? "आज की हाज़िरी लगाएं" : "Mark today's attendance",
-      gradient: "bg-emerald-600",
-    },
-    {
-      to: "/campaign-history",
-      icon: History,
-      label: t("campaignHistory"),
-      desc: lang === "hi" ? "पिछले अभियान देखें" : "View past campaigns",
-      gradient: "bg-violet-600",
     },
   ];
 
