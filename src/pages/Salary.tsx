@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, Share2 } from "lucide-react";
+import { Download, Share2, IndianRupee, Users, CalendarCheck, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
@@ -55,6 +55,8 @@ export default function Salary() {
   }, [user, month]);
 
   const grandTotal = data.reduce((s, w) => s + w.totalSalary, 0);
+  const totalPresent = data.reduce((s, w) => s + w.presentDays, 0);
+  const totalHalf = data.reduce((s, w) => s + w.halfDays, 0);
 
   const currentYear = new Date().getFullYear();
   const months: { value: string; label: string }[] = [];
@@ -103,55 +105,132 @@ export default function Salary() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
+  const getInitials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+
   return (
     <AppLayout>
-      <div className="animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-display">{t("salary")}</h1>
-            <p className="text-muted-foreground">{t("monthlySalaryBreakdown")}</p>
+      <div className="animate-fade-in space-y-6">
+        {/* Header Banner */}
+        <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8">
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
+          <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
+          <div className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
+                <IndianRupee size={24} className="text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">{t("salary")}</h1>
+                <p className="text-primary-foreground/70 text-sm mt-1">{t("monthlySalaryBreakdown")}</p>
+              </div>
+            </div>
+            <Select value={month} onValueChange={setMonth}>
+              <SelectTrigger className="w-[170px] bg-white/15 border-white/10 text-primary-foreground rounded-xl backdrop-blur-sm font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>{months.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
-          <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>{months.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
-          </Select>
         </div>
 
         {loading ? (
           <div className="space-y-4">
-            <Skeleton className="h-24 w-full rounded-xl" />
-            {[1, 2, 3].map((i) => <Card key={i}><CardContent className="p-4 space-y-3"><Skeleton className="h-5 w-28" /><Skeleton className="h-14 w-full rounded-lg" /></CardContent></Card>)}
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+            </div>
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-40 rounded-2xl" />)}
           </div>
         ) : (
           <>
-            <Card className="mb-4 gradient-primary">
-              <CardContent className="flex items-center justify-between p-6">
-                <div>
-                  <p className="text-sm text-primary-foreground/80">{t("totalPayable")}</p>
-                  <p className="text-3xl font-bold font-display text-primary-foreground">₹{grandTotal.toLocaleString("en-IN")}</p>
-                </div>
-                <p className="text-sm text-primary-foreground/80">{data.length} {t("workers_count")}</p>
-              </CardContent>
-            </Card>
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="rounded-2xl border-border/40">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <div className="w-8 h-8 rounded-lg gradient-primary grid place-items-center mx-auto mb-1.5">
+                    <IndianRupee size={16} className="text-primary-foreground" />
+                  </div>
+                  <p className="text-lg md:text-xl font-extrabold font-display">₹{grandTotal.toLocaleString("en-IN")}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">{t("totalPayable")}</p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-2xl border-border/40">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/15 grid place-items-center mx-auto mb-1.5">
+                    <CalendarCheck size={16} className="text-emerald-600" />
+                  </div>
+                  <p className="text-lg md:text-xl font-extrabold font-display">{totalPresent}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">{t("presentDays")}</p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-2xl border-border/40">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/15 grid place-items-center mx-auto mb-1.5">
+                    <Users size={16} className="text-violet-600" />
+                  </div>
+                  <p className="text-lg md:text-xl font-extrabold font-display">{data.length}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">{t("workers_count")}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Worker Salary Cards */}
             {data.length === 0 ? (
-              <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">{t("addWorkersForSalary")}</CardContent></Card>
+              <Card className="border-dashed rounded-2xl">
+                <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                  <div className="w-16 h-16 rounded-2xl bg-accent grid place-items-center mb-4">
+                    <IndianRupee size={32} className="text-muted-foreground/50" />
+                  </div>
+                  <p className="font-medium">{t("addWorkersForSalary")}</p>
+                </CardContent>
+              </Card>
             ) : (
               <div className="space-y-3">
                 {data.map((w) => (
-                  <Card key={w.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div><h3 className="font-semibold font-display">{w.name}</h3><p className="text-sm text-muted-foreground">{w.role || t("worker")}</p></div>
-                        <p className="text-lg font-bold font-display text-primary">₹{w.totalSalary.toLocaleString("en-IN")}</p>
+                  <Card key={w.id} className="group rounded-2xl border-border/40 hover:border-primary/20 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                    <CardContent className="p-0">
+                      {/* Worker Header */}
+                      <div className="p-5 pb-4">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="shrink-0 w-11 h-11 rounded-xl gradient-primary grid place-items-center text-primary-foreground font-bold font-display text-sm">
+                              {getInitials(w.name)}
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="font-bold font-display text-foreground truncate">{w.name}</h3>
+                              <p className="text-xs text-muted-foreground">{w.role || t("worker")}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xl md:text-2xl font-extrabold font-display text-primary">₹{w.totalSalary.toLocaleString("en-IN")}</p>
+                            <p className="text-[10px] text-muted-foreground">{t("finalSalary")}</p>
+                          </div>
+                        </div>
+
+                        {/* Attendance Breakdown */}
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="rounded-xl bg-success/10 border border-success/20 p-2.5">
+                            <p className="text-[10px] text-muted-foreground font-medium mb-0.5">{t("presentDays")}</p>
+                            <p className="font-extrabold font-display text-foreground text-sm">{w.presentDays}</p>
+                          </div>
+                          <div className="rounded-xl bg-warning/10 border border-warning/20 p-2.5">
+                            <p className="text-[10px] text-muted-foreground font-medium mb-0.5">{t("halfDays")}</p>
+                            <p className="font-extrabold font-display text-foreground text-sm">{w.halfDays}</p>
+                          </div>
+                          <div className="rounded-xl bg-accent border border-border/40 p-2.5">
+                            <p className="text-[10px] text-muted-foreground font-medium mb-0.5">{t("dailyRate")}</p>
+                            <p className="font-extrabold font-display text-foreground text-sm">₹{w.daily_salary}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs mb-3">
-                        <div className="rounded-lg bg-accent p-2"><p className="text-muted-foreground">{t("presentDays")}</p><p className="font-semibold text-accent-foreground">{w.presentDays} days</p></div>
-                        <div className="rounded-lg bg-accent p-2"><p className="text-muted-foreground">{t("halfDays")}</p><p className="font-semibold text-accent-foreground">{w.halfDays} days</p></div>
-                        <div className="rounded-lg bg-accent p-2"><p className="text-muted-foreground">{t("dailyRate")}</p><p className="font-semibold text-accent-foreground">₹{w.daily_salary}</p></div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => generatePDF(w)}><Download className="h-4 w-4 mr-1" /> {t("exportPdf")}</Button>
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => shareOnWhatsApp(w)}><Share2 className="h-4 w-4 mr-1" /> {t("whatsApp")}</Button>
+
+                      {/* Action Footer */}
+                      <div className="bg-gradient-to-r from-primary/5 to-accent border-t border-border/40 px-5 py-3 flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => generatePDF(w)}>
+                          <Download size={14} /> {t("exportPdf")}
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1.5 font-medium h-9" onClick={() => shareOnWhatsApp(w)}>
+                          <Share2 size={14} /> {t("whatsApp")}
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
