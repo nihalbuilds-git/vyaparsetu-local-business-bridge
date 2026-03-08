@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Megaphone, Users, History, CalendarCheck, IndianRupee,
-  BarChart3, ArrowRight, TrendingUp, Clock, Sparkles
+  BarChart3, ArrowRight, TrendingUp, Clock, Sparkles,
+  FileText, CreditCard, Wallet, Plus
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import BusinessInsights from "@/components/dashboard/BusinessInsights";
@@ -158,11 +159,39 @@ export default function Dashboard() {
 
   const quickActions = [
     {
+      to: "/attendance",
+      icon: CalendarCheck,
+      label: lang === "hi" ? "हाज़िरी लगाएं" : "Mark Attendance",
+      desc: lang === "hi" ? "आज की हाज़िरी एक क्लिक में" : "One tap daily attendance",
+      gradient: "bg-emerald-600",
+    },
+    {
+      to: "/invoices",
+      icon: FileText,
+      label: lang === "hi" ? "बिल बनाएं" : "Create Invoice",
+      desc: lang === "hi" ? "तुरंत बिल बनाएं" : "Generate invoice instantly",
+      gradient: "gradient-primary",
+    },
+    {
+      to: "/khata",
+      icon: CreditCard,
+      label: lang === "hi" ? "खाता एंट्री" : "Khata Entry",
+      desc: lang === "hi" ? "उधार / जमा लिखें" : "Record credit / debit",
+      gradient: "bg-amber-600",
+    },
+    {
+      to: "/expenses",
+      icon: Wallet,
+      label: lang === "hi" ? "खर्चा लिखें" : "Add Expense",
+      desc: lang === "hi" ? "आय / खर्च दर्ज करें" : "Track income & expenses",
+      gradient: "bg-red-600",
+    },
+    {
       to: "/campaign",
       icon: Megaphone,
       label: t("aiCampaigns"),
       desc: lang === "hi" ? "AI से मार्केटिंग बनाएं" : "Create AI marketing",
-      gradient: "gradient-primary",
+      gradient: "bg-violet-600",
     },
     {
       to: "/workers",
@@ -170,20 +199,6 @@ export default function Dashboard() {
       label: t("workers"),
       desc: lang === "hi" ? "टीम मैनेज करें" : "Manage your team",
       gradient: "bg-secondary",
-    },
-    {
-      to: "/attendance",
-      icon: CalendarCheck,
-      label: t("attendance"),
-      desc: lang === "hi" ? "आज की हाज़िरी लगाएं" : "Mark today's attendance",
-      gradient: "bg-emerald-600",
-    },
-    {
-      to: "/campaign-history",
-      icon: History,
-      label: t("campaignHistory"),
-      desc: lang === "hi" ? "पिछले अभियान देखें" : "View past campaigns",
-      gradient: "bg-violet-600",
     },
   ];
 
@@ -260,7 +275,7 @@ export default function Dashboard() {
               <h2 className="text-lg font-bold font-display text-foreground mb-4">
                 {lang === "hi" ? "तुरंत कार्रवाई" : "Quick Actions"}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {quickActions.map((action) => (
                   <Link key={action.to} to={action.to}>
                     <Card className="group border-border/40 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 rounded-2xl cursor-pointer">
