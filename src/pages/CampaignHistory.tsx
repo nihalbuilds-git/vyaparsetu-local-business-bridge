@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Megaphone, Eye, CalendarDays } from "lucide-react";
+import { Megaphone, Eye, CalendarDays, Send } from "lucide-react";
+import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 interface Campaign { id: string; message: string | null; poster_url: string | null; created_at: string; }
 
@@ -17,6 +18,7 @@ export default function CampaignHistory() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Campaign | null>(null);
+  const [sendCampaign, setSendCampaign] = useState<Campaign | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -58,9 +60,14 @@ export default function CampaignHistory() {
                       </div>
                       <p className="text-sm line-clamp-2">{c.message || t("noMessage")}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="gap-1 shrink-0" onClick={() => setSelected(c)}>
-                      <Eye size={14} /> {t("view")}
-                    </Button>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelected(c)}>
+                        <Eye size={14} /> {t("view")}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSendCampaign(c)}>
+                        <Send size={14} /> {t("send")}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -83,6 +90,15 @@ export default function CampaignHistory() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {sendCampaign && (
+        <SendCampaignDialog
+          open={!!sendCampaign}
+          onOpenChange={(v) => !v && setSendCampaign(null)}
+          message={sendCampaign.message || ""}
+          posterUrl={sendCampaign.poster_url}
+        />
+      )}
     </AppLayout>
   );
 }
