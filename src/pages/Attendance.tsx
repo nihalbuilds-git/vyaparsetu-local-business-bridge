@@ -29,6 +29,7 @@ export default function Attendance() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const date = format(selectedDate, "yyyy-MM-dd");
   const isToday = date === format(new Date(), "yyyy-MM-dd");
