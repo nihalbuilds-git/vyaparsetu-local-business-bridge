@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { downloadCSV } from "@/lib/csv-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -10,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2 } from "lucide-react";
+import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
 
@@ -110,7 +111,14 @@ export default function Khata() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1">{t("khataSubtext")}</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
+              downloadCSV("khata-book", ["Customer", "Phone", "Type", "Amount", "Description", "Date"],
+                entries.map(e => [e.customer_name, e.customer_phone || "", e.entry_type, Number(e.amount), e.description || "", format(new Date(e.date), "dd MMM yyyy")])
+              );
+              toast({ title: "CSV Downloaded" });
+            }}><Download size={16} /> CSV</Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gradient-primary text-primary-foreground gap-2 rounded-xl">
                 <Plus size={18} /> {t("addEntry")}
@@ -135,7 +143,8 @@ export default function Khata() {
                 <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground rounded-xl">{t("save")}</Button>
               </div>
             </DialogContent>
-          </Dialog>
+           </Dialog>
+          </div>
         </div>
 
         {/* Summary Cards */}

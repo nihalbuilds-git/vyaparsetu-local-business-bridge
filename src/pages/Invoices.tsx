@@ -176,12 +176,17 @@ export default function Invoices() {
           <Card className="rounded-2xl"><CardContent className="p-8 text-center text-muted-foreground">{t("noInvoices")}</CardContent></Card>
         ) : (
           <div className="space-y-3">
-            {invoices.map(inv => (
+            {invoices.map((inv, index) => {
+              const invoiceNum = `INV-${String(invoices.length - index).padStart(3, "0")}`;
+              return (
               <Card key={inv.id} className="rounded-2xl">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-foreground">{inv.customer_name}</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{invoiceNum}</span>
+                        <h3 className="font-bold text-foreground">{inv.customer_name}</h3>
+                      </div>
                       <p className="text-xs text-muted-foreground">{format(new Date(inv.date), "dd MMM yyyy")} · {inv.items.length} {t("invoiceItems").toLowerCase()}</p>
                     </div>
                     <p className="font-bold text-primary text-lg">₹{Number(inv.total).toLocaleString("en-IN")}</p>
@@ -193,7 +198,8 @@ export default function Invoices() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

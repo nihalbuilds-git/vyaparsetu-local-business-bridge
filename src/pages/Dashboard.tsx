@@ -11,12 +11,20 @@ import {
   BarChart3, ArrowRight, TrendingUp, Clock, Sparkles
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import BusinessInsights from "@/components/dashboard/BusinessInsights";
 
 interface Stats {
   totalWorkers: number;
   attendancePercent: number;
   monthlySalary: number;
   totalCampaigns: number;
+}
+
+interface BusinessHealth {
+  khataBalance: number;
+  lowStockCount: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
 }
 
 function getGreeting(lang: string): string {
@@ -38,6 +46,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalWorkers: 0, attendancePercent: 0, monthlySalary: 0, totalCampaigns: 0 });
+  const [health, setHealth] = useState<BusinessHealth>({ khataBalance: 0, lowStockCount: 0, monthlyIncome: 0, monthlyExpense: 0 });
 
   const load = async () => {
     if (!user) return;
@@ -76,6 +85,21 @@ export default function Dashboard() {
     if (biz?.id) {
       const { count } = await supabase.from("campaigns").select("id", { count: "exact", head: true }).eq("business_id", biz.id);
       totalCampaigns = count || 0;
+
+      // Fetch business health data
+      const [khataRes, inventoryRes, expenseRes] = await Promise.all([
+        supabase.from("khata_entries").select("entry_type, amount").eq("business_id", biz.id),
+        supabase.from("inventory_items").select("quantity, low_stock_threshold").eq("business_id", biz.id),
+        supabase.from("expenses").select("entry_type, amount").eq("business_id", biz.id).gte("date", monthStart).lte("date", monthEnd),
+      ]);
+
+      const khataCredit = (khataRes.data || []).filter((k: any) => k.entry_type === "credit").reduce((s: number, k: any) => s + Number(k.amount), 0);
+      const khataDebit = (khataRes.data || []).filter((k: any) => k.entry_type === "debit").reduce((s: number, k: any) => s + Number(k.amount), 0);
+      const lowStockCount = (inventoryRes.data || []).filter((i: any) => Number(i.quantity) <= Number(i.low_stock_threshold)).length;
+      const monthlyIncome = (expenseRes.data || []).filter((e: any) => e.entry_type === "income").reduce((s: number, e: any) => s + Number(e.amount), 0);
+      const monthlyExpense = (expenseRes.data || []).filter((e: any) => e.entry_type === "expense").reduce((s: number, e: any) => s + Number(e.amount), 0);
+
+      setHealth({ khataBalance: khataCredit - khataDebit, lowStockCount, monthlyIncome, monthlyExpense });
     }
 
     setStats({ totalWorkers, attendancePercent, monthlySalary, totalCampaigns });
@@ -221,6 +245,15 @@ export default function Dashboard() {
                 </Card>
               ))}
             </div>
+
+            {/* Business Health Insights */}
+            <BusinessInsights
+              khataBalance={health.khataBalance}
+              lowStockCount={health.lowStockCount}
+              monthlyIncome={health.monthlyIncome}
+              monthlyExpense={health.monthlyExpense}
+              lang={lang}
+            />
 
             {/* Quick Actions */}
             <div>

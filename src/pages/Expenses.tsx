@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { downloadCSV } from "@/lib/csv-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, BarChart3, TrendingUp, TrendingDown, Trash2, Wallet } from "lucide-react";
+import { Plus, BarChart3, TrendingUp, TrendingDown, Trash2, Wallet, Download } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface Expense {
@@ -94,6 +95,12 @@ export default function Expenses() {
           </div>
           <div className="flex gap-2">
             <Input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="rounded-xl w-auto" />
+            <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
+              downloadCSV(`expenses-${selectedMonth}`, ["Date", "Type", "Category", "Description", "Amount"],
+                entries.map(e => [format(new Date(e.date), "dd MMM yyyy"), e.entry_type, e.category || "", e.description || "", Number(e.amount)])
+              );
+              toast({ title: "CSV Downloaded" });
+            }}><Download size={16} /> CSV</Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground gap-2 rounded-xl"><Plus size={18} /> {t("addEntry")}</Button>
