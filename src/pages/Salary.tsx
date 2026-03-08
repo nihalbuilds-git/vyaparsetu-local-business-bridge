@@ -100,9 +100,9 @@ export default function Salary() {
     toast({ title: t("pdfDownloaded"), description: t("salarySlipDownloaded", { name: worker.name }) });
   };
 
-  const shareOnWhatsApp = (worker: WorkerSalary) => {
+  const shareWorkerOnWhatsApp = (worker: WorkerSalary) => {
     const text = `*${t("salarySlip")} - ${businessName}*\n${t("month")}: ${monthLabel}\n\n${t("worker")}: ${worker.name}\n${t("role")}: ${worker.role || t("worker")}\n${t("present")}: ${worker.presentDays} days\n${t("halfDays")}: ${worker.halfDays}\n${t("absent")}: ${worker.absentDays} days\n${t("dailyRate")}: Rs. ${worker.daily_salary}\n*${t("finalSalary")}: Rs. ${worker.totalSalary.toLocaleString("en-IN")}*`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    shareOnWhatsApp(text);
   };
 
   const getInitials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
