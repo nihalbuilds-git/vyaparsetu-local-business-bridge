@@ -143,7 +143,8 @@ export default function Khata() {
                 <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground rounded-xl">{t("save")}</Button>
               </div>
             </DialogContent>
-          </Dialog>
+           </Dialog>
+          </div>
         </div>
 
         {/* Summary Cards */}
