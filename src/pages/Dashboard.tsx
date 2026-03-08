@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalWorkers: 0, attendancePercent: 0, monthlySalary: 0, totalCampaigns: 0 });
+  const [health, setHealth] = useState<BusinessHealth>({ khataBalance: 0, lowStockCount: 0, monthlyIncome: 0, monthlyExpense: 0 });
 
   const load = async () => {
     if (!user) return;
