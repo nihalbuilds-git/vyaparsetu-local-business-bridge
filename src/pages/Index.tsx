@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Users, CalendarCheck, IndianRupee, Megaphone, ArrowRight, Globe } from "lucide-react";
+import { Users, CalendarCheck, IndianRupee, Megaphone, ArrowRight, Globe, Moon, Sun } from "lucide-react";
 import type { TranslationKey } from "@/lib/i18n";
 
 const features: { icon: typeof Users; titleKey: TranslationKey; descKey: TranslationKey }[] = [
