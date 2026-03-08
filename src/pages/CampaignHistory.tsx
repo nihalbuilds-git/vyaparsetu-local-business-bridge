@@ -90,6 +90,15 @@ export default function CampaignHistory() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {sendCampaign && (
+        <SendCampaignDialog
+          open={!!sendCampaign}
+          onOpenChange={(v) => !v && setSendCampaign(null)}
+          message={sendCampaign.message || ""}
+          posterUrl={sendCampaign.poster_url}
+        />
+      )}
     </AppLayout>
   );
 }
