@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, IndianRupee, Users, CalendarCheck, TrendingUp } from "lucide-react";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
