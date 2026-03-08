@@ -11,7 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { business_id, campaign_type, offer_text } = await req.json();
+    const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt } = await req.json();
     if (!business_id || !campaign_type || !offer_text) {
       return new Response(JSON.stringify({ error: "business_id, campaign_type, and offer_text are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
