@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Users, CalendarCheck, IndianRupee, Megaphone, ArrowRight, Globe } from "lucide-react";
+import { Users, CalendarCheck, IndianRupee, Megaphone, ArrowRight, Globe, Moon, Sun } from "lucide-react";
 import type { TranslationKey } from "@/lib/i18n";
 
 const features: { icon: typeof Users; titleKey: TranslationKey; descKey: TranslationKey }[] = [
@@ -241,8 +241,20 @@ export default function Index() {
         />
       ))}
 
-      {/* Language toggle */}
-      <div className="absolute top-5 right-5 z-10">
+      {/* Top controls */}
+      <div className="absolute top-5 right-5 z-10 flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            document.documentElement.classList.toggle("dark");
+          }}
+          className="gap-2 backdrop-blur-sm bg-card/60 border-border/50 hover:bg-card/80 transition-all"
+        >
+          <Sun size={14} className="dark:hidden" />
+          <Moon size={14} className="hidden dark:block" />
+        </Button>
         <Button
           variant="outline"
           size="sm"
