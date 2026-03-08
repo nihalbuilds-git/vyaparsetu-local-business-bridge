@@ -23,6 +23,8 @@ export default function LandingFeatures() {
       </p>
       <h2 className="reveal-card opacity-0 text-center font-display font-extrabold text-foreground mb-2 sm:mb-3 text-2xl sm:text-3xl md:text-4xl">
         {t("everythingInOneApp")}
+        <span className="block mx-auto mt-2 h-1 w-16 rounded-full bg-primary animate-[scale-in_0.6s_ease-out_forwards] origin-center" />
+      </h2>
       </h2>
       <p className="reveal-card opacity-0 text-center text-muted-foreground text-sm sm:text-base max-w-[480px] mx-auto mb-10 sm:mb-14 leading-relaxed px-2">
         {t("featuresSubtext")}
