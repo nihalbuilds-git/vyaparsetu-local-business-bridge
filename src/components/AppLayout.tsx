@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
-import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser, CreditCard, Package, FileText, Wallet, Clock } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser, CreditCard, Package, FileText, Wallet, Clock, BarChart3, Store, Crown } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
 
 const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashboard }[] = [
@@ -17,6 +18,9 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/worker-advances", labelKey: "workerAdvances", icon: Clock },
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
   { to: "/contacts", labelKey: "contacts", icon: BookUser },
+  { to: "/analytics", labelKey: "analyticsTitle", icon: BarChart3 },
+  { to: "/stores", labelKey: "storesTitle", icon: Store },
+  { to: "/pricing", labelKey: "pricingTitle", icon: Crown },
   { to: "/business-profile", labelKey: "profile", icon: User },
 ];
 
@@ -82,6 +86,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <span className="font-bold font-display">VyaparSetu</span>
           </div>
           <div className="flex gap-1">
+            <NotificationBell />
             <Button variant="ghost" size="sm" onClick={toggleLang}>
               <Globe size={16} />
             </Button>
