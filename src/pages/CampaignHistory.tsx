@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Megaphone, Eye, CalendarDays } from "lucide-react";
+import { Megaphone, Eye, CalendarDays, Send } from "lucide-react";
+import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 interface Campaign { id: string; message: string | null; poster_url: string | null; created_at: string; }
 
