@@ -239,6 +239,7 @@ const translations = {
     invalidEmail: "Enter a valid email address",
 
     // Send Campaign
+    send: "Send",
     sendCampaign: "Send Campaign",
     selectAtLeastOne: "Select at least one contact",
     campaignSentSuccess: "Campaign opened for {count} contacts!",
