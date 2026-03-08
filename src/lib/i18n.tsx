@@ -372,6 +372,29 @@ const translations = {
     ctaNote: "✓ Free plan stays free forever · ✓ Dedicated support · ✓ No hidden charges",
     footerTagline: "The Digital Partner for Local Shopkeepers",
     madeWithLove: "Made with ❤️ for India",
+
+    // Analytics
+    analyticsTitle: "Analytics Dashboard",
+    analyticsSubtext: "Revenue trends, attendance patterns & top workers",
+    revenueTrends: "Revenue Trends (6 Months)",
+    attendancePatterns: "Attendance Patterns (7 Days)",
+    topWorkers: "Top Workers This Month",
+
+    // Notifications
+    notificationsTitle: "Notifications",
+    notificationsSubtext: "Stay updated with alerts & reminders",
+    noNotifications: "No notifications yet",
+
+    // Pricing
+    pricingTitle: "Choose Your Plan",
+    pricingSubtext: "Pick the plan that works best for your business",
+
+    // Stores
+    storesTitle: "My Stores",
+    storesSubtext: "Manage multiple shops & branches from one account",
+
+    // WhatsApp
+    shareOnWhatsApp: "Share on WhatsApp",
   },
   hi: {
     // Nav
