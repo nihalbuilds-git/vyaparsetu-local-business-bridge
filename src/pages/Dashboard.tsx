@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Megaphone, Users, History, CalendarCheck, IndianRupee,
-  BarChart3, ArrowRight, TrendingUp, Clock, Sparkles
+  BarChart3, ArrowRight, TrendingUp, Clock, Sparkles,
+  FileText, CreditCard, Wallet, Plus
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import BusinessInsights from "@/components/dashboard/BusinessInsights";
