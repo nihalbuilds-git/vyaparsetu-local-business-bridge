@@ -132,6 +132,14 @@ export default function Salary() {
               </SelectTrigger>
               <SelectContent>{months.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
             </Select>
+            <Button variant="ghost" size="sm" className="bg-white/15 border-white/10 text-primary-foreground rounded-xl backdrop-blur-sm" disabled={data.length === 0} onClick={() => {
+              downloadCSV(`salary-${month}`, ["Name", "Role", "Present Days", "Half Days", "Absent Days", "Daily Rate", "Total Salary"],
+                data.map(w => [w.name, w.role || "Worker", w.presentDays, w.halfDays, w.absentDays, w.daily_salary, w.totalSalary])
+              );
+              toast({ title: t("pdfDownloaded"), description: "CSV exported" });
+            }}>
+              <Download size={16} className="mr-1" /> CSV
+            </Button>
           </div>
         </div>
 
