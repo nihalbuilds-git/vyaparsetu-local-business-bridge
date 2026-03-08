@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { Users, CalendarCheck, IndianRupee, Megaphone, FileText, Shield } from "lucide-react";
+import { Users, CalendarCheck, IndianRupee, Megaphone, FileText, Shield, CreditCard, Package, Wallet, Clock } from "lucide-react";
 import type { TranslationKey } from "@/lib/i18n";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
@@ -7,6 +7,11 @@ const features: { icon: typeof Users; titleKey: TranslationKey; descKey: Transla
   { icon: Users, titleKey: "workersManagement", descKey: "workersManagementDesc" },
   { icon: CalendarCheck, titleKey: "dailyAttendance", descKey: "dailyAttendanceDesc" },
   { icon: IndianRupee, titleKey: "salaryCalculator", descKey: "salaryCalculatorDesc" },
+  { icon: CreditCard, titleKey: "khataFeature", descKey: "khataFeatureDesc" },
+  { icon: Package, titleKey: "inventoryFeature", descKey: "inventoryFeatureDesc" },
+  { icon: FileText, titleKey: "invoiceFeature", descKey: "invoiceFeatureDesc" },
+  { icon: Wallet, titleKey: "expenseFeature", descKey: "expenseFeatureDesc" },
+  { icon: Clock, titleKey: "advanceFeature", descKey: "advanceFeatureDesc" },
   { icon: Megaphone, titleKey: "aiCampaignsFeature", descKey: "aiCampaignsDesc" },
   { icon: FileText, titleKey: "reportsHistory", descKey: "reportsHistoryDesc" },
   { icon: Shield, titleKey: "safeSecure", descKey: "safeSecureDesc" },
