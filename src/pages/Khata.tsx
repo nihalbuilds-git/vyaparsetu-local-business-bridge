@@ -111,7 +111,14 @@ export default function Khata() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1">{t("khataSubtext")}</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
+              downloadCSV("khata-book", ["Customer", "Phone", "Type", "Amount", "Description", "Date"],
+                entries.map(e => [e.customer_name, e.customer_phone || "", e.entry_type, Number(e.amount), e.description || "", format(new Date(e.date), "dd MMM yyyy")])
+              );
+              toast({ title: "CSV Downloaded" });
+            }}><Download size={16} /> CSV</Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gradient-primary text-primary-foreground gap-2 rounded-xl">
                 <Plus size={18} /> {t("addEntry")}
