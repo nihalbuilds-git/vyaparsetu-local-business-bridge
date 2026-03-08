@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee } from "lucide-react";
+import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2 } from "lucide-react";
 import { format } from "date-fns";
+import { shareOnWhatsApp } from "@/lib/whatsapp";
 
 interface KhataEntry {
   id: string;
