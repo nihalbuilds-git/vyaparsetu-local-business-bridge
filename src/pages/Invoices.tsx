@@ -110,6 +110,7 @@ export default function Invoices() {
     setForm({ customer_name: "", customer_phone: "", gst_percent: "18", date: format(new Date(), "yyyy-MM-dd") });
     setLineItems([{ name: "", qty: 1, price: 0 }]);
     setEditingId(null);
+    setGstEnabled(true);
   };
 
   const openEdit = (inv: Invoice) => {
