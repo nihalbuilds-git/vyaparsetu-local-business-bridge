@@ -260,7 +260,18 @@ export default function Invoices() {
                   <Button variant="outline" size="sm" onClick={addLine} className="rounded-xl gap-1"><Plus size={14} /> {t("addItem")}</Button>
                 </div>
 
-                <div><Label>GST %</Label><Input type="number" value={form.gst_percent} onChange={e => setForm(f => ({ ...f, gst_percent: e.target.value }))} className="rounded-xl" /></div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>GST</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{gstEnabled ? "ON" : "OFF"}</span>
+                      <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+                    </div>
+                  </div>
+                  {gstEnabled && (
+                    <Input type="number" value={form.gst_percent} onChange={e => setForm(f => ({ ...f, gst_percent: e.target.value }))} placeholder="18" className="rounded-xl" />
+                  )}
+                </div>
                 <div><Label>{t("date")}</Label><Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="rounded-xl" /></div>
 
                 <Card className="rounded-xl bg-muted/50"><CardContent className="p-3 space-y-1 text-sm">
