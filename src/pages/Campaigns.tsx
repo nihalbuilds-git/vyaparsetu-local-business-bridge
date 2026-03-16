@@ -60,7 +60,7 @@ export default function Campaigns() {
     }
 
     try {
-      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text };
+      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text, platform: form.platform };
       if (posterOnly && result) {
         body.poster_only = true;
         body.existing_message = result.message;
