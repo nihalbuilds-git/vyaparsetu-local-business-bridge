@@ -98,14 +98,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Mobile bottom nav - key actions */}
+        {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
           {[
             { to: "/dashboard", labelKey: "dashboard" as TranslationKey, icon: LayoutDashboard },
             { to: "/attendance", labelKey: "attendance" as TranslationKey, icon: CalendarCheck },
             { to: "/khata", labelKey: "khataBook" as TranslationKey, icon: CreditCard },
             { to: "/invoices", labelKey: "invoices" as TranslationKey, icon: FileText },
-            { to: "/expenses", labelKey: "expenseTracker" as TranslationKey, icon: Wallet },
           ].map(({ to, labelKey, icon: Icon }) => (
             <Link
               key={to}
@@ -118,7 +117,50 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               {t(labelKey)}
             </Link>
           ))}
+          <button
+            onClick={() => setMoreOpen(true)}
+            className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium text-muted-foreground transition-colors"
+          >
+            <Menu size={20} />
+            More
+          </button>
         </nav>
+
+        {/* Mobile "More" sheet */}
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+          <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-2xl pb-8">
+            <SheetHeader>
+              <SheetTitle className="text-left">{t("dashboard")}</SheetTitle>
+            </SheetHeader>
+            <nav className="grid grid-cols-3 gap-3 pt-4">
+              {navItems.map(({ to, labelKey, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setMoreOpen(false)}
+                  className={`flex flex-col items-center gap-2 rounded-xl p-3 text-xs font-medium transition-colors ${
+                    pathname === to
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  <Icon size={22} />
+                  {t(labelKey)}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-4 flex gap-2 border-t border-border pt-4">
+              <Button variant="outline" onClick={toggleLang} className="flex-1 gap-2">
+                <Globe size={16} />
+                {lang === "en" ? "हिन्दी" : "English"}
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="flex-1 gap-2 text-destructive hover:text-destructive">
+                <LogOut size={16} />
+                {t("signOut")}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
 
         <main className="flex-1 overflow-auto p-4 md:p-8 pb-20 md:pb-8">{children}</main>
       </div>
