@@ -30,6 +30,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { t, lang, setLang } = useI18n();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
