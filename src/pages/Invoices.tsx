@@ -76,7 +76,7 @@ export default function Invoices() {
   useEffect(() => { load(); }, [user]);
 
   const subtotal = lineItems.reduce((s, i) => s + i.qty * i.price, 0);
-  const gstAmt = subtotal * (parseFloat(form.gst_percent) || 0) / 100;
+  const gstAmt = gstEnabled ? subtotal * (parseFloat(form.gst_percent) || 0) / 100 : 0;
   const total = subtotal + gstAmt;
 
   const addLine = () => setLineItems(l => [...l, { name: "", qty: 1, price: 0 }]);
