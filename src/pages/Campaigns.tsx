@@ -31,7 +31,7 @@ export default function Campaigns() {
   const { toast } = useToast();
   const { t, lang } = useI18n();
   const [businessId, setBusinessId] = useState<string | null>(null);
-  const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "" });
+  const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "", platform: "whatsapp" });
   const [result, setResult] = useState<{ message: string; image_prompt: string; poster_url: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [posterLoading, setPosterLoading] = useState(false);
