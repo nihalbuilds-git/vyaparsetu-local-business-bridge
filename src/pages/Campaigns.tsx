@@ -153,6 +153,28 @@ export default function Campaigns() {
                 </div>
                 <div>
                   <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 block">
+                    {lang === "hi" ? "प्लेटफार्म" : "Platform"}
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {platformOptions.map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, platform: p.id }))}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                          form.platform === p.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        <span>{p.icon}</span>
+                        <span className="truncate">{p.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 block">
                     {t("offerPromotion")}
                   </Label>
                   <Textarea

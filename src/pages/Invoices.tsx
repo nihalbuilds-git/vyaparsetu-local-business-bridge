@@ -122,6 +122,7 @@ export default function Invoices() {
     });
     setLineItems(inv.items.length > 0 ? [...inv.items] : [{ name: "", qty: 1, price: 0 }]);
     setEditingId(inv.id);
+    setGstEnabled(Number(inv.gst_percent) > 0);
     setDialogOpen(true);
   };
 

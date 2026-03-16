@@ -115,7 +115,17 @@ export default function Inventory() {
                 <div><Label>{t("itemName")}</Label><Input value={form.item_name} onChange={e => setForm(f => ({ ...f, item_name: e.target.value }))} placeholder={t("itemNamePlaceholder")} className="rounded-xl" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label>{t("quantity")}</Label><Input type="number" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} placeholder="0" className="rounded-xl" /></div>
-                  <div><Label>{t("unit")}</Label><Input value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} placeholder="pcs, kg, L" className="rounded-xl" /></div>
+                  <div>
+                    <Label>{t("unit")}</Label>
+                    <Select value={form.unit} onValueChange={v => setForm(f => ({ ...f, unit: v }))}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="Select unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unitOptions.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label>{t("purchasePrice")} (₹)</Label><Input type="number" value={form.purchase_price} onChange={e => setForm(f => ({ ...f, purchase_price: e.target.value }))} placeholder="0" className="rounded-xl" /></div>
