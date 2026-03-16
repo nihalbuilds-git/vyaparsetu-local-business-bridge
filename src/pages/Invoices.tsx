@@ -50,6 +50,7 @@ export default function Invoices() {
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ customer_name: "", customer_phone: "", gst_percent: "18", date: format(new Date(), "yyyy-MM-dd") });
+  const [gstEnabled, setGstEnabled] = useState(true);
   const [lineItems, setLineItems] = useState<InvoiceItem[]>([{ name: "", qty: 1, price: 0 }]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [itemSearchIdx, setItemSearchIdx] = useState<number | null>(null);
