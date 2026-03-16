@@ -17,6 +17,14 @@ import {
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
+const platformOptions = [
+  { id: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { id: "instagram", label: "Instagram", icon: "📸" },
+  { id: "facebook", label: "Facebook", icon: "📘" },
+  { id: "sms", label: "SMS", icon: "📱" },
+  { id: "email", label: "Email", icon: "📧" },
+  { id: "general", label: "General", icon: "🌐" },
+];
 
 export default function Campaigns() {
   const { user } = useAuth();
