@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Trash2, Download, Share2, Eye, Pencil, Search, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
@@ -49,6 +50,7 @@ export default function Invoices() {
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ customer_name: "", customer_phone: "", gst_percent: "18", date: format(new Date(), "yyyy-MM-dd") });
+  const [gstEnabled, setGstEnabled] = useState(true);
   const [lineItems, setLineItems] = useState<InvoiceItem[]>([{ name: "", qty: 1, price: 0 }]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [itemSearchIdx, setItemSearchIdx] = useState<number | null>(null);
@@ -74,7 +76,7 @@ export default function Invoices() {
   useEffect(() => { load(); }, [user]);
 
   const subtotal = lineItems.reduce((s, i) => s + i.qty * i.price, 0);
-  const gstAmt = subtotal * (parseFloat(form.gst_percent) || 0) / 100;
+  const gstAmt = gstEnabled ? subtotal * (parseFloat(form.gst_percent) || 0) / 100 : 0;
   const total = subtotal + gstAmt;
 
   const addLine = () => setLineItems(l => [...l, { name: "", qty: 1, price: 0 }]);
@@ -108,6 +110,7 @@ export default function Invoices() {
     setForm({ customer_name: "", customer_phone: "", gst_percent: "18", date: format(new Date(), "yyyy-MM-dd") });
     setLineItems([{ name: "", qty: 1, price: 0 }]);
     setEditingId(null);
+    setGstEnabled(true);
   };
 
   const openEdit = (inv: Invoice) => {
@@ -119,6 +122,7 @@ export default function Invoices() {
     });
     setLineItems(inv.items.length > 0 ? [...inv.items] : [{ name: "", qty: 1, price: 0 }]);
     setEditingId(inv.id);
+    setGstEnabled(Number(inv.gst_percent) > 0);
     setDialogOpen(true);
   };
 
@@ -258,7 +262,18 @@ export default function Invoices() {
                   <Button variant="outline" size="sm" onClick={addLine} className="rounded-xl gap-1"><Plus size={14} /> {t("addItem")}</Button>
                 </div>
 
-                <div><Label>GST %</Label><Input type="number" value={form.gst_percent} onChange={e => setForm(f => ({ ...f, gst_percent: e.target.value }))} className="rounded-xl" /></div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>GST</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{gstEnabled ? "ON" : "OFF"}</span>
+                      <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+                    </div>
+                  </div>
+                  {gstEnabled && (
+                    <Input type="number" value={form.gst_percent} onChange={e => setForm(f => ({ ...f, gst_percent: e.target.value }))} placeholder="18" className="rounded-xl" />
+                  )}
+                </div>
                 <div><Label>{t("date")}</Label><Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="rounded-xl" /></div>
 
                 <Card className="rounded-xl bg-muted/50"><CardContent className="p-3 space-y-1 text-sm">

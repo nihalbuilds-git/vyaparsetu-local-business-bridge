@@ -17,13 +17,21 @@ import {
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
+const platformOptions = [
+  { id: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { id: "instagram", label: "Instagram", icon: "📸" },
+  { id: "facebook", label: "Facebook", icon: "📘" },
+  { id: "sms", label: "SMS", icon: "📱" },
+  { id: "email", label: "Email", icon: "📧" },
+  { id: "general", label: "General", icon: "🌐" },
+];
 
 export default function Campaigns() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t, lang } = useI18n();
   const [businessId, setBusinessId] = useState<string | null>(null);
-  const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "" });
+  const [form, setForm] = useState({ campaign_type: "New Offer", offer_text: "", platform: "whatsapp" });
   const [result, setResult] = useState<{ message: string; image_prompt: string; poster_url: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [posterLoading, setPosterLoading] = useState(false);
@@ -52,7 +60,7 @@ export default function Campaigns() {
     }
 
     try {
-      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text };
+      const body: any = { business_id: businessId, campaign_type: form.campaign_type, offer_text: form.offer_text, platform: form.platform };
       if (posterOnly && result) {
         body.poster_only = true;
         body.existing_message = result.message;
@@ -142,6 +150,28 @@ export default function Campaigns() {
                       {campaignTypes.map((ct) => <SelectItem key={ct} value={ct}>{ct}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 block">
+                    {lang === "hi" ? "प्लेटफार्म" : "Platform"}
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {platformOptions.map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, platform: p.id }))}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                          form.platform === p.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        <span>{p.icon}</span>
+                        <span className="truncate">{p.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 block">
