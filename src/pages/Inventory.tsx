@@ -12,6 +12,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Package, Search, Trash2, Edit, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const unitOptions = ["pcs", "kg", "g", "L", "mL", "m", "cm", "ft", "box", "pack", "dozen", "pair", "set"];
 
 interface InventoryItem {
   id: string;
