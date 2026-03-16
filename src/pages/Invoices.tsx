@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Trash2, Download, Share2, Eye, Pencil, Search, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
