@@ -5,12 +5,22 @@ import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Megaphone, Eye, CalendarDays, Send } from "lucide-react";
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
-interface Campaign { id: string; message: string | null; poster_url: string | null; created_at: string; }
+const platformMap: Record<string, { label: string; icon: string; color: string }> = {
+  whatsapp: { label: "WhatsApp", icon: "💬", color: "bg-green-100 text-green-800 border-green-200" },
+  instagram: { label: "Instagram", icon: "📸", color: "bg-pink-100 text-pink-800 border-pink-200" },
+  facebook: { label: "Facebook", icon: "📘", color: "bg-blue-100 text-blue-800 border-blue-200" },
+  sms: { label: "SMS", icon: "📱", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  email: { label: "Email", icon: "📧", color: "bg-purple-100 text-purple-800 border-purple-200" },
+  general: { label: "General", icon: "🌐", color: "bg-accent text-accent-foreground border-border" },
+};
+
+interface Campaign { id: string; message: string | null; poster_url: string | null; created_at: string; platform: string | null; }
 
 export default function CampaignHistory() {
   const { user } = useAuth();
@@ -35,6 +45,15 @@ export default function CampaignHistory() {
 
   const locale = lang === "hi" ? "hi-IN" : "en-IN";
 
+  const PlatformBadge = ({ platform }: { platform: string | null }) => {
+    const p = platformMap[platform || "general"] || platformMap.general;
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${p.color}`}>
+        {p.icon} {p.label}
+      </span>
+    );
+  };
+
   return (
     <AppLayout>
       <div className="animate-fade-in max-w-2xl">
@@ -57,6 +76,7 @@ export default function CampaignHistory() {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                         <CalendarDays size={12} />
                         {new Date(c.created_at).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        <PlatformBadge platform={c.platform} />
                       </div>
                       <p className="text-sm line-clamp-2">{c.message || t("noMessage")}</p>
                     </div>
@@ -80,9 +100,10 @@ export default function CampaignHistory() {
             <DialogHeader><DialogTitle className="font-display">{t("campaignDetails")}</DialogTitle></DialogHeader>
             {selected && (
               <div className="space-y-4">
-                <div className="text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {t("created")}: {new Date(selected.created_at).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </div>
+                <PlatformBadge platform={selected.platform} />
                 <div className="rounded-lg bg-accent p-4 whitespace-pre-wrap text-sm">{selected.message || t("noMessage")}</div>
                 {selected.poster_url && <img src={selected.poster_url} alt="Campaign poster" className="rounded-lg w-full" />}
               </div>
