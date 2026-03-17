@@ -12,8 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Copy, Download, Share2, Image as ImageIcon,
-  Pencil, Check, Send, Wand2, Zap, FileText
+  Pencil, Check, Send, Wand2, Zap, FileText, History
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
