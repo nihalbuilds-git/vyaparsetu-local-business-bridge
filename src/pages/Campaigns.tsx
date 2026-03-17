@@ -111,7 +111,7 @@ export default function Campaigns() {
             <div className="flex items-start gap-4">
               <Wand2 size={24} className="text-primary-foreground" />
             </div>
-            <div>
+            <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
              <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
                 {t("aiCampaigns")}
               </h1>
