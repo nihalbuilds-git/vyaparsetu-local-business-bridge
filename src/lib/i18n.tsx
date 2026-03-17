@@ -153,6 +153,9 @@ const translations = {
     created: "Created",
     noMessage: "No message",
     view: "View",
+    deleteCampaign: "Delete",
+    confirmDeleteCampaign: "Are you sure you want to delete this campaign?",
+    campaignDeleted: "Campaign deleted successfully",
 
     // Profile
     businessProfile: "Business Profile",
