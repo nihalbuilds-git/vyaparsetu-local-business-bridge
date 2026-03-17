@@ -549,6 +549,9 @@ const translations = {
     created: "बनाया गया",
     noMessage: "कोई संदेश नहीं",
     view: "देखें",
+    deleteCampaign: "हटाएं",
+    confirmDeleteCampaign: "क्या आप इस अभियान को हटाना चाहते हैं?",
+    campaignDeleted: "अभियान सफलतापूर्वक हटाया गया",
 
     // Profile
     businessProfile: "बिज़नेस प्रोफ़ाइल",
