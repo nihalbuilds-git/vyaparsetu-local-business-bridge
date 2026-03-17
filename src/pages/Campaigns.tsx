@@ -112,12 +112,17 @@ export default function Campaigns() {
               <Wand2 size={24} className="text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
+             <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
                 {t("aiCampaigns")}
               </h1>
               <p className="text-primary-foreground/70 text-sm mt-1">{t("generateMarketing")}</p>
             </div>
           </div>
+          <Link to="/campaign-history" className="relative z-10">
+            <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl font-semibold">
+              <History size={15} /> {t("campaignHistory")}
+            </Button>
+          </Link>
         </div>
 
         {pageLoading ? (

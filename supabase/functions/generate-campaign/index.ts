@@ -177,6 +177,7 @@ ${image_prompt}`;
       business_id,
       message,
       poster_url,
+      platform: platform || "general",
     });
 
     return new Response(JSON.stringify({ message, image_prompt, poster_url }), {
