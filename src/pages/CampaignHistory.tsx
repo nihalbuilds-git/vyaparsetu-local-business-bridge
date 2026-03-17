@@ -5,10 +5,14 @@ import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Megaphone, Eye, CalendarDays, Send } from "lucide-react";
+import { Megaphone, Eye, CalendarDays, Send, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const platformMap: Record<string, { label: string; icon: string; color: string }> = {
@@ -25,10 +29,13 @@ interface Campaign { id: string; message: string | null; poster_url: string | nu
 export default function CampaignHistory() {
   const { user } = useAuth();
   const { t, lang } = useI18n();
+  const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Campaign | null>(null);
   const [sendCampaign, setSendCampaign] = useState<Campaign | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -42,6 +49,18 @@ export default function CampaignHistory() {
     };
     load();
   }, [user]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("campaigns").delete().eq("id", deleteTarget.id);
+    if (!error) {
+      setCampaigns((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      toast({ title: t("campaignDeleted") });
+    }
+    setDeleting(false);
+    setDeleteTarget(null);
+  };
 
   const locale = lang === "hi" ? "hi-IN" : "en-IN";
 
@@ -87,6 +106,9 @@ export default function CampaignHistory() {
                       <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSendCampaign(c)}>
                         <Send size={14} /> {t("send")}
                       </Button>
+                      <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(c)}>
+                        <Trash2 size={14} /> {t("deleteCampaign")}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -95,6 +117,7 @@ export default function CampaignHistory() {
           </div>
         )}
 
+        {/* View Dialog */}
         <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle className="font-display">{t("campaignDetails")}</DialogTitle></DialogHeader>
@@ -110,6 +133,22 @@ export default function CampaignHistory() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("deleteCampaign")}</AlertDialogTitle>
+              <AlertDialogDescription>{t("confirmDeleteCampaign")}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {deleting ? t("pleaseWait") : t("deleteCampaign")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {sendCampaign && (
