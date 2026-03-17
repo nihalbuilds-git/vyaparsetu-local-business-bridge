@@ -11,7 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt } = await req.json();
+    const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt, platform } = await req.json();
     if (!business_id || !campaign_type || !offer_text) {
       return new Response(JSON.stringify({ error: "business_id, campaign_type, and offer_text are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -37,15 +37,26 @@ serve(async (req) => {
       image_prompt = existing_image_prompt || `Marketing poster for ${businessName} ${category} store, ${campaign_type} campaign, ${offer_text}`;
     } else {
       // Step 1: Generate marketing message + image prompt
+      const platformTone: Record<string, string> = {
+        whatsapp: "Use plenty of emojis 🎉🔥💥, keep it casual and friendly, short paragraphs, suitable for WhatsApp broadcast. Add a personal touch like 'Dear Customer'.",
+        instagram: "Include 15-20 relevant hashtags at the end, use line breaks for readability, add emojis sparingly, make it caption-ready for Instagram posts/reels.",
+        facebook: "Write an engaging Facebook post with a hook in the first line, use 2-3 emojis, include a clear CTA like 'Visit us today!' or 'Comment YES to know more'. Add 3-5 relevant hashtags.",
+        sms: "Keep it under 160 characters, no emojis, direct and clear with a strong CTA. Include business name and offer only.",
+        email: "Write a professional yet warm marketing email body. Use proper formatting with greeting, offer details, urgency, and a clear call-to-action. No hashtags.",
+        general: "Write a versatile marketing message with moderate emoji use, suitable for any platform. Include a call to action.",
+      };
+      const toneInstruction = platformTone[platform || "general"] || platformTone.general;
+
       const systemPrompt = `You are a marketing expert for small Indian businesses. You must respond with valid JSON only, no markdown.
 Return a JSON object with exactly two keys:
-- "message": A compelling marketing message (under 500 chars, with emojis, culturally relevant for India, includes a call to action)
+- "message": A compelling marketing message (culturally relevant for India, includes a call to action). PLATFORM STYLE: ${toneInstruction}
 - "image_prompt": A detailed text-to-image prompt describing a marketing poster for this campaign (include style, colors, elements, text to show on poster)`;
 
       const userPrompt = `Business: ${businessName}
 Category: ${category}
 Campaign Type: ${campaign_type}
 Offer: ${offer_text}
+Target Platform: ${platform || "general"}
 
 Generate the marketing message and image prompt as JSON.`;
 
