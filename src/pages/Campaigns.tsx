@@ -107,8 +107,8 @@ export default function Campaigns() {
         <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8 mb-6">
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
               <Wand2 size={24} className="text-primary-foreground" />
             </div>
             <div>
