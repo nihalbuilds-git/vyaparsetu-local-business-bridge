@@ -82,6 +82,7 @@ export type Database = {
           created_at: string
           id: string
           message: string | null
+          platform: string | null
           poster_url: string | null
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string | null
+          platform?: string | null
           poster_url?: string | null
         }
         Update: {
@@ -96,6 +98,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string | null
+          platform?: string | null
           poster_url?: string | null
         }
         Relationships: [

@@ -12,8 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Copy, Download, Share2, Image as ImageIcon,
-  Pencil, Check, Send, Wand2, Zap, FileText
+  Pencil, Check, Send, Wand2, Zap, FileText, History
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import SendCampaignDialog from "@/components/SendCampaignDialog";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
@@ -106,17 +107,22 @@ export default function Campaigns() {
         <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8 mb-6">
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
               <Wand2 size={24} className="text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
+            <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
+             <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
                 {t("aiCampaigns")}
               </h1>
               <p className="text-primary-foreground/70 text-sm mt-1">{t("generateMarketing")}</p>
             </div>
           </div>
+          <Link to="/campaign-history" className="relative z-10">
+            <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl font-semibold">
+              <History size={15} /> {t("campaignHistory")}
+            </Button>
+          </Link>
         </div>
 
         {pageLoading ? (
