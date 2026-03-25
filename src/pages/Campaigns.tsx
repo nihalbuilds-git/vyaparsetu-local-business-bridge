@@ -107,7 +107,7 @@ export default function Campaigns() {
         <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 md:p-8 mb-6">
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
-          <div className="relative z-10 flex items-start justify-between gap-4">
+        <div className="relative z-10">
             <div className="flex items-start gap-3">
               <Wand2 size={24} className="text-primary-foreground mt-1" />
               <div>
@@ -117,11 +117,6 @@ export default function Campaigns() {
                 <p className="text-primary-foreground/70 text-sm mt-1">{t("generateMarketing")}</p>
               </div>
             </div>
-            <Link to="/campaign-history" className="shrink-0">
-              <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl font-semibold">
-                <History size={15} /> {t("campaignHistory")}
-              </Button>
-            </Link>
           </div>
         </div>
 
