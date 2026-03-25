@@ -120,6 +120,15 @@ export default function Campaigns() {
           </div>
         </div>
 
+        {/* Campaign History Button */}
+        <div className="mb-6">
+          <Link to="/campaign-history">
+            <Button variant="outline" className="w-full gap-2 rounded-xl h-11 font-semibold border-primary/30 hover:bg-primary/5">
+              <History size={16} className="text-primary" /> {t("campaignHistory")}
+            </Button>
+          </Link>
+        </div>
+
         {pageLoading ? (
           <Card className="rounded-2xl">
             <CardContent className="p-6 space-y-4">
