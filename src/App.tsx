@@ -26,6 +26,7 @@ import WorkerAdvances from "./pages/WorkerAdvances";
 import Notifications from "./pages/Notifications";
 import Pricing from "./pages/Pricing";
 import Stores from "./pages/Stores";
+import WhatsAppRemindersPage from "./pages/WhatsAppReminders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
               <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
               <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
+              <Route path="/whatsapp-reminders" element={<ProtectedRoute><WhatsAppRemindersPage /></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
+import VoiceInput from "@/components/VoiceInput";
 
 interface KhataEntry {
   id: string;
@@ -28,7 +29,7 @@ interface KhataEntry {
 
 export default function Khata() {
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const [entries, setEntries] = useState<KhataEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,10 +110,10 @@ export default function Khata() {
               <CreditCard className="text-primary" size={28} />
               {t("khataBook")}
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">{t("khataSubtext")}</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
+             <p className="text-muted-foreground text-sm mt-1">{t("khataSubtext")}</p>
+           </div>
+           <div className="flex gap-2">
+             <Button variant="outline" size="sm" className="rounded-xl gap-1" disabled={entries.length === 0} onClick={() => {
               downloadCSV("khata-book", ["Customer", "Phone", "Type", "Amount", "Description", "Date"],
                 entries.map(e => [e.customer_name, e.customer_phone || "", e.entry_type, Number(e.amount), e.description || "", format(new Date(e.date), "dd MMM yyyy")])
               );
@@ -168,6 +169,28 @@ export default function Khata() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Voice Input */}
+        <Card className="rounded-2xl border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <VoiceInput
+              lang={lang}
+              onTranscript={() => {}}
+              onParsedEntry={(entry) => {
+                setForm({
+                  customer_name: entry.customer_name,
+                  customer_phone: "",
+                  amount: entry.amount,
+                  entry_type: entry.entry_type,
+                  description: entry.description,
+                  date: format(new Date(), "yyyy-MM-dd"),
+                });
+                setDialogOpen(true);
+              }}
+              businessId={businessId}
+            />
+          </CardContent>
+        </Card>
 
         {/* Search */}
         <div className="relative">

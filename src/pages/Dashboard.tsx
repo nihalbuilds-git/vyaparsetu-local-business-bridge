@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Megaphone, Users, History, CalendarCheck, IndianRupee,
   BarChart3, ArrowRight, TrendingUp, Clock, Sparkles,
-  FileText, CreditCard, Wallet, Plus
+  FileText, CreditCard, Wallet, Plus, MessageSquare
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import BusinessInsights from "@/components/dashboard/BusinessInsights";
@@ -192,6 +192,13 @@ export default function Dashboard() {
       label: t("aiCampaigns"),
       desc: lang === "hi" ? "AI से मार्केटिंग बनाएं" : "Create AI marketing",
       gradient: "bg-violet-600",
+    },
+    {
+      to: "/whatsapp-reminders",
+      icon: MessageSquare,
+      label: lang === "hi" ? "WhatsApp रिमाइंडर" : "WhatsApp Reminders",
+      desc: lang === "hi" ? "हाज़िरी और भुगतान रिमाइंडर" : "Attendance & payment alerts",
+      gradient: "bg-emerald-600",
     },
     {
       to: "/workers",
