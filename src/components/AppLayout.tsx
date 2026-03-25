@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
-import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser, CreditCard, Package, FileText, Wallet, Clock, Store, Crown, Menu } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, IndianRupee, Megaphone, User, LogOut, Globe, BookUser, CreditCard, Package, FileText, Wallet, Clock, Store, Crown, Menu, MessageSquare } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -19,6 +19,7 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/worker-advances", labelKey: "workerAdvances", icon: Clock },
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
   { to: "/contacts", labelKey: "contacts", icon: BookUser },
+  { to: "/whatsapp-reminders", labelKey: "shareOnWhatsApp", icon: MessageSquare },
   
   { to: "/stores", labelKey: "storesTitle", icon: Store },
   { to: "/pricing", labelKey: "pricingTitle", icon: Crown },
