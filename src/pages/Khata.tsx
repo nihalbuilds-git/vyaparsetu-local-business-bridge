@@ -170,6 +170,28 @@ export default function Khata() {
           </Card>
         </div>
 
+        {/* Voice Input */}
+        <Card className="rounded-2xl border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <VoiceInput
+              lang={lang}
+              onTranscript={() => {}}
+              onParsedEntry={(entry) => {
+                setForm({
+                  customer_name: entry.customer_name,
+                  customer_phone: "",
+                  amount: entry.amount,
+                  entry_type: entry.entry_type,
+                  description: entry.description,
+                  date: format(new Date(), "yyyy-MM-dd"),
+                });
+                setDialogOpen(true);
+              }}
+              businessId={businessId}
+            />
+          </CardContent>
+        </Card>
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
