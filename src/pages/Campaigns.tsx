@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SendCampaignDialog from "@/components/SendCampaignDialog";
+import FestivalTemplates from "@/components/FestivalTemplates";
 
 const campaignTypes = ["New Offer", "Festival Sale", "Clearance Sale", "New Product"];
 const platformOptions = [
@@ -139,6 +140,18 @@ export default function Campaigns() {
           </Card>
         ) : (
           <>
+            {/* Festival Templates */}
+            <Card className="mb-6 rounded-2xl border-border/40 shadow-sm">
+              <CardContent className="p-5">
+                <FestivalTemplates
+                  lang={lang}
+                  onSelect={(offer, campaignType) => {
+                    setForm(f => ({ ...f, offer_text: offer, campaign_type: campaignType }));
+                  }}
+                />
+              </CardContent>
+            </Card>
+
             {/* Input Form */}
             <Card className="mb-6 rounded-2xl border-border/40 shadow-sm">
               <CardContent className="p-5 md:p-6 space-y-5">
