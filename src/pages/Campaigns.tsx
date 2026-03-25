@@ -108,21 +108,21 @@ export default function Campaigns() {
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5" />
           <div className="relative z-10 flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Wand2 size={24} className="text-primary-foreground" />
+            <div className="flex items-start gap-3">
+              <Wand2 size={24} className="text-primary-foreground mt-1" />
+              <div>
+                <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
+                  {t("aiCampaigns")}
+                </h1>
+                <p className="text-primary-foreground/70 text-sm mt-1">{t("generateMarketing")}</p>
+              </div>
             </div>
-            <div className="shrink-0 w-12 h-12 rounded-xl bg-white/20 grid place-items-center">
-             <h1 className="text-xl md:text-2xl font-extrabold font-display text-primary-foreground">
-                {t("aiCampaigns")}
-              </h1>
-              <p className="text-primary-foreground/70 text-sm mt-1">{t("generateMarketing")}</p>
-            </div>
+            <Link to="/campaign-history" className="shrink-0">
+              <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl font-semibold">
+                <History size={15} /> {t("campaignHistory")}
+              </Button>
+            </Link>
           </div>
-          <Link to="/campaign-history" className="relative z-10">
-            <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl font-semibold">
-              <History size={15} /> {t("campaignHistory")}
-            </Button>
-          </Link>
         </div>
 
         {pageLoading ? (
