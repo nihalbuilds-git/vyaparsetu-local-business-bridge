@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
-import VoiceInput from "@/components/VoiceInput";
+
 
 interface KhataEntry {
   id: string;
@@ -170,27 +170,6 @@ export default function Khata() {
           </Card>
         </div>
 
-        {/* Voice Input */}
-        <Card className="rounded-2xl border-primary/20 bg-primary/5">
-          <CardContent className="p-4">
-            <VoiceInput
-              lang={lang}
-              onTranscript={() => {}}
-              onParsedEntry={(entry) => {
-                setForm({
-                  customer_name: entry.customer_name,
-                  customer_phone: "",
-                  amount: entry.amount,
-                  entry_type: entry.entry_type,
-                  description: entry.description,
-                  date: format(new Date(), "yyyy-MM-dd"),
-                });
-                setDialogOpen(true);
-              }}
-              businessId={businessId}
-            />
-          </CardContent>
-        </Card>
 
         {/* Search */}
         <div className="relative">
