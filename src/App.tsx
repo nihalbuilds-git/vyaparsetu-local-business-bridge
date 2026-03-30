@@ -27,6 +27,7 @@ import Notifications from "./pages/Notifications";
 import Pricing from "./pages/Pricing";
 import Stores from "./pages/Stores";
 import WhatsAppRemindersPage from "./pages/WhatsAppReminders";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
