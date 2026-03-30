@@ -20,7 +20,7 @@ const navItems: { to: string; labelKey: TranslationKey; icon: typeof LayoutDashb
   { to: "/campaign", labelKey: "aiCampaigns", icon: Megaphone },
   { to: "/contacts", labelKey: "contacts", icon: BookUser },
   { to: "/whatsapp-reminders", labelKey: "shareOnWhatsApp", icon: MessageSquare },
-  
+  { to: "/reports", labelKey: "analyticsTitle", icon: TrendingUp },
   { to: "/stores", labelKey: "storesTitle", icon: Store },
   { to: "/pricing", labelKey: "pricingTitle", icon: Crown },
   { to: "/business-profile", labelKey: "profile", icon: User },
