@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, CreditCard, TrendingUp, TrendingDown, Trash2, Phone, Search, IndianRupee, Share2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { shareOnWhatsApp } from "@/lib/whatsapp";
-import VoiceInput from "@/components/VoiceInput";
+
 
 interface KhataEntry {
   id: string;
