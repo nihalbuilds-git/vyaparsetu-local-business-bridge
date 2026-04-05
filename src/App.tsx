@@ -75,9 +75,11 @@ const App = () => (
               <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
               <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
               <Route path="/whatsapp-reminders" element={<ProtectedRoute><WhatsAppRemindersPage /></ProtectedRoute>} />
+              <Route path="/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <AIChatWidget />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
