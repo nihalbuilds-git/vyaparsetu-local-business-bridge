@@ -376,6 +376,9 @@ const translations = {
     footerTagline: "The Digital Partner for Local Shopkeepers",
     madeWithLove: "Made with ❤️ for India",
 
+    // AI Assistant
+    aiAssistant: "AI Assistant",
+
     // Analytics
     analyticsTitle: "Analytics Dashboard",
     analyticsSubtext: "Revenue trends, attendance patterns & top workers",
@@ -771,6 +774,9 @@ const translations = {
     ctaNote: "✓ मुफ़्त प्लान हमेशा मुफ़्त · ✓ समर्पित सहायता · ✓ कोई छिपे शुल्क नहीं",
     footerTagline: "स्थानीय दुकानदारों का डिजिटल साथी",
     madeWithLove: "❤️ से भारत के लिए बनाया गया",
+
+    // AI Assistant
+    aiAssistant: "AI सहायक",
 
     // Analytics
     analyticsTitle: "एनालिटिक्स डैशबोर्ड",
