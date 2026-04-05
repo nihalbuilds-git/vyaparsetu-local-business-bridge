@@ -28,7 +28,9 @@ import Pricing from "./pages/Pricing";
 import Stores from "./pages/Stores";
 import WhatsAppRemindersPage from "./pages/WhatsAppReminders";
 import Reports from "./pages/Reports";
+import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound";
+import AIChatWidget from "./components/AIChatWidget";
 
 const queryClient = new QueryClient();
 
