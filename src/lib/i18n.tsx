@@ -775,6 +775,9 @@ const translations = {
     footerTagline: "स्थानीय दुकानदारों का डिजिटल साथी",
     madeWithLove: "❤️ से भारत के लिए बनाया गया",
 
+    // AI Assistant
+    aiAssistant: "AI सहायक",
+
     // Analytics
     analyticsTitle: "एनालिटिक्स डैशबोर्ड",
     analyticsSubtext: "राजस्व रुझान, उपस्थिति पैटर्न और शीर्ष कर्मचारी",
