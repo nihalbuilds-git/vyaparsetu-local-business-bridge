@@ -376,6 +376,9 @@ const translations = {
     footerTagline: "The Digital Partner for Local Shopkeepers",
     madeWithLove: "Made with ❤️ for India",
 
+    // AI Assistant
+    aiAssistant: "AI Assistant",
+
     // Analytics
     analyticsTitle: "Analytics Dashboard",
     analyticsSubtext: "Revenue trends, attendance patterns & top workers",
