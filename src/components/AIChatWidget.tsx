@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User, Sparkles, Maximize2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Sparkles, Maximize2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -23,15 +24,21 @@ export default function AIChatWidget() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (transcript) setInput(transcript);
+  }, [transcript]);
+
   if (!user) return null;
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    if (isListening) stopListening();
     const userMsg: Msg = { role: "user", content: text.trim() };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
@@ -75,7 +82,6 @@ export default function AIChatWidget() {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-
         let idx: number;
         while ((idx = buffer.indexOf("\n")) !== -1) {
           let line = buffer.slice(0, idx);
@@ -102,7 +108,6 @@ export default function AIChatWidget() {
 
   return (
     <>
-      {/* Floating button */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -113,7 +118,6 @@ export default function AIChatWidget() {
         </button>
       )}
 
-      {/* Chat panel */}
       {open && (
         <div className="fixed bottom-20 md:bottom-6 right-4 z-50 flex w-[340px] sm:w-[380px] flex-col rounded-2xl border border-border bg-card shadow-2xl"
           style={{ height: "min(500px, calc(100vh - 120px))" }}>
@@ -123,7 +127,7 @@ export default function AIChatWidget() {
               <Bot size={20} />
               <div>
                 <p className="font-semibold text-sm">VyaparSetu AI</p>
-                <p className="text-[10px] opacity-80">Your Business Assistant</p>
+                <p className="text-[10px] opacity-80">Voice + Text • Multi-language</p>
               </div>
             </div>
             <div className="flex gap-1">
@@ -147,7 +151,7 @@ export default function AIChatWidget() {
                     <Bot size={14} className="text-primary-foreground" />
                   </div>
                   <div className="rounded-xl bg-muted p-3 text-sm">
-                    Namaste! 🙏 Main aapka VyaparSetu AI assistant hoon. Business se related koi bhi sawal puchiye!
+                    Namaste! 🙏 Kuch bhi puchiye — type karo ya 🎙️ mic use karo!
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -202,10 +206,22 @@ export default function AIChatWidget() {
           {/* Input */}
           <form onSubmit={e => { e.preventDefault(); sendMessage(input); }}
             className="flex items-center gap-2 border-t border-border p-3">
+            {isSupported && (
+              <Button
+                type="button"
+                variant={isListening ? "destructive" : "ghost"}
+                size="icon"
+                className={`h-9 w-9 shrink-0 ${isListening ? "animate-pulse" : ""}`}
+                onClick={isListening ? stopListening : startListening}
+                disabled={isLoading}
+              >
+                {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+              </Button>
+            )}
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Apna sawal puchiye..."
+              placeholder={isListening ? "🎙️ Sun raha hoon..." : "Apna sawal puchiye..."}
               className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary"
               disabled={isLoading}
             />
