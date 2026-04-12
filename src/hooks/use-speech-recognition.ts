@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface SpeechRecognitionHook {
   isListening: boolean;
@@ -12,6 +12,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+  const shouldRestartRef = useRef(false);
 
   const SpeechRecognition =
     typeof window !== "undefined"
@@ -22,32 +23,72 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
   const startListening = useCallback(() => {
     if (!SpeechRecognition || isListening) return;
+
+    // Instantiate synchronously within the user gesture handler
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = "hi-IN"; // Hindi + English mixed
+    recognition.lang = "hi-IN";
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: any) => {
-      let result = "";
+      let finalText = "";
+      let interimText = "";
       for (let i = 0; i < event.results.length; i++) {
-        result += event.results[i][0].transcript;
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += t;
+        } else {
+          interimText += t;
+        }
       }
-      setTranscript(result);
+      setTranscript(finalText + interimText);
     };
 
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => {
+      if (shouldRestartRef.current) {
+        try {
+          recognition.start();
+        } catch {
+          setIsListening(false);
+          shouldRestartRef.current = false;
+        }
+      } else {
+        setIsListening(false);
+      }
+    };
+
+    recognition.onerror = (e: any) => {
+      // Don't stop for 'no-speech' — keep listening
+      if (e.error === "no-speech") return;
+      shouldRestartRef.current = false;
+      setIsListening(false);
+    };
 
     recognitionRef.current = recognition;
+    shouldRestartRef.current = true;
     setTranscript("");
     setIsListening(true);
-    recognition.start();
+
+    try {
+      recognition.start();
+    } catch {
+      setIsListening(false);
+      shouldRestartRef.current = false;
+    }
   }, [SpeechRecognition, isListening]);
 
   const stopListening = useCallback(() => {
+    shouldRestartRef.current = false;
     recognitionRef.current?.stop();
     setIsListening(false);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      shouldRestartRef.current = false;
+      recognitionRef.current?.stop();
+    };
   }, []);
 
   return { isListening, transcript, startListening, stopListening, isSupported };
