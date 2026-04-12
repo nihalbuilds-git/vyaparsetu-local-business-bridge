@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/AppLayout";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -286,12 +287,18 @@ export default function Assistant() {
                     ? <User size={16} className="text-primary" />
                     : <Bot size={16} className="text-primary-foreground" />}
                 </div>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm ${
+                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
                   m.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    ? "bg-primary text-primary-foreground rounded-br-md whitespace-pre-wrap"
                     : "bg-card border border-border text-foreground rounded-bl-md"
                 }`}>
-                  {m.content}
+                  {m.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:rounded-lg">
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    m.content
+                  )}
                   {isLoading && i === messages.length - 1 && m.role === "assistant" && (
                     <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 rounded-sm" />
                   )}

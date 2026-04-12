@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User, Sparkles, Maximize2, Mic, MicOff } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -174,12 +175,18 @@ export default function AIChatWidget() {
                     ? <User size={14} className="text-primary" />
                     : <Bot size={14} className="text-primary-foreground" />}
                 </div>
-                <div className={`max-w-[80%] rounded-xl p-3 text-sm whitespace-pre-wrap ${
+                <div className={`max-w-[80%] rounded-xl p-3 text-sm ${
                   m.role === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground whitespace-pre-wrap"
                     : "bg-muted text-foreground"
                 }`}>
-                  {m.content}
+                  {m.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-background prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-background prose-pre:rounded-lg">
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    m.content
+                  )}
                   {isLoading && i === messages.length - 1 && m.role === "assistant" && (
                     <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 rounded-sm" />
                   )}
