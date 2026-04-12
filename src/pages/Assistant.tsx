@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock } from "lucide-react";
+import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/AppLayout";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -11,12 +11,12 @@ type Msg = { role: "user" | "assistant"; content: string };
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
 
 const SUGGESTIONS = [
-  { icon: "📊", text: "Meri shop ka profit kaise badhau?" },
-  { icon: "🧾", text: "GST invoice kaise banaye?" },
-  { icon: "📦", text: "Inventory management ke best tips" },
-  { icon: "📱", text: "WhatsApp se marketing kaise kare?" },
-  { icon: "💰", text: "Cash flow manage karne ke tips" },
-  { icon: "👷", text: "Worker salary calculate kaise hoti hai?" },
+  { icon: "📊", text: "Meri shop ka profit kaise badhau?", category: "Business" },
+  { icon: "🧾", text: "GST invoice kaise banaye?", category: "Tax" },
+  { icon: "📦", text: "Inventory management ke best tips", category: "Inventory" },
+  { icon: "📱", text: "WhatsApp se marketing kaise kare?", category: "Marketing" },
+  { icon: "💰", text: "Cash flow manage karne ke tips", category: "Finance" },
+  { icon: "👷", text: "Worker salary calculate kaise hoti hai?", category: "HR" },
 ];
 
 export default function Assistant() {
@@ -34,7 +34,6 @@ export default function Assistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Sync transcript to input
   useEffect(() => {
     if (transcript) setInput(transcript);
   }, [transcript]);
@@ -48,7 +47,6 @@ export default function Assistant() {
     setInput("");
     setIsLoading(true);
 
-    // Get or create conversation
     let convId = activeConversationId;
     if (!convId) {
       convId = await createConversation(text.trim());
@@ -114,7 +112,6 @@ export default function Assistant() {
       upsert("Connection error. Please check your internet.");
     }
 
-    // Save assistant response
     if (convId && assistantSoFar) {
       await saveMessage(convId, "assistant", assistantSoFar);
     }
@@ -127,38 +124,58 @@ export default function Assistant() {
     <AppLayout>
       <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-4">
         {/* Sidebar - conversation history */}
-        <div className="hidden md:flex w-64 flex-col rounded-xl border border-border bg-card">
-          <div className="flex items-center justify-between p-3 border-b border-border">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <Clock size={14} /> Chat History
-            </h3>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={newChat}>
-              <Plus size={14} />
-            </Button>
+        <div className="hidden md:flex w-72 flex-col rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="gradient-primary px-4 py-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-primary-foreground flex items-center gap-2">
+                <Clock size={14} /> Chat History
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
+                onClick={newChat}
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+            <p className="text-[10px] text-primary-foreground/70 mt-1">
+              {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
+            </p>
           </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
             {conversations.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-4">No chats yet</p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <MessageSquare size={24} className="text-muted-foreground/40 mb-2" />
+                <p className="text-xs text-muted-foreground">No chats yet</p>
+                <p className="text-[10px] text-muted-foreground/60">Start a conversation below!</p>
+              </div>
             )}
             {conversations.map(c => (
               <div
                 key={c.id}
-                className={`group flex items-center gap-2 rounded-lg p-2 text-xs cursor-pointer transition-colors ${
-                  activeConversationId === c.id ? "bg-primary/10 text-primary" : "hover:bg-accent"
+                className={`group flex items-center gap-2.5 rounded-xl p-2.5 text-xs cursor-pointer transition-all duration-200 ${
+                  activeConversationId === c.id
+                    ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
+                    : "hover:bg-accent border border-transparent"
                 }`}
                 onClick={() => loadMessages(c.id)}
               >
-                <MessageSquare size={12} className="shrink-0" />
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                  activeConversationId === c.id ? "gradient-primary" : "bg-muted"
+                }`}>
+                  <MessageSquare size={12} className={activeConversationId === c.id ? "text-primary-foreground" : "text-muted-foreground"} />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate font-medium">{c.title}</p>
+                  <p className="truncate font-semibold">{c.title}</p>
                   <p className="text-[10px] text-muted-foreground">{format(new Date(c.updated_at), "dd MMM, HH:mm")}</p>
                 </div>
                 <Button
                   variant="ghost" size="icon"
-                  className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0"
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0 hover:text-destructive"
                   onClick={e => { e.stopPropagation(); deleteConversation(c.id); }}
                 >
-                  <Trash2 size={10} />
+                  <Trash2 size={11} />
                 </Button>
               </div>
             ))}
@@ -167,23 +184,43 @@ export default function Assistant() {
 
         {/* Main chat area */}
         <div className="flex flex-1 flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-                <Sparkles size={20} className="text-primary-foreground" />
+          {/* Premium Header */}
+          <div className="flex items-center justify-between mb-4 p-4 rounded-2xl gradient-primary shadow-lg">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm border border-white/30">
+                  <BrainCircuit size={24} className="text-primary-foreground" />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green-400 border-2 border-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold font-display">VyaparSetu AI Assistant</h1>
-                <p className="text-xs text-muted-foreground">Your personal business advisor • Multi-language • Voice enabled 🎙️</p>
+                <h1 className="text-lg font-bold text-primary-foreground font-display flex items-center gap-2">
+                  VyaparSetu AI
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
+                    <Zap size={8} /> PRO
+                  </span>
+                </h1>
+                <p className="text-xs text-primary-foreground/80">
+                  Smart Business Advisor • Multi-language • Voice enabled 🎙️
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="md:hidden" onClick={newChat}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden text-primary-foreground hover:bg-white/20 rounded-lg"
+                onClick={newChat}
+              >
                 <Plus size={14} className="mr-1" /> New
               </Button>
               {messages.length > 0 && (
-                <Button variant="outline" size="sm" onClick={newChat}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary-foreground hover:bg-white/20 rounded-lg hidden md:flex"
+                  onClick={newChat}
+                >
                   <Plus size={14} className="mr-1" /> New Chat
                 </Button>
               )}
@@ -191,26 +228,49 @@ export default function Assistant() {
           </div>
 
           {/* Chat area */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-xl border border-border bg-muted/30 p-4 space-y-4">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/40 p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full space-y-6">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary">
-                  <Bot size={32} className="text-primary-foreground" />
+              <div className="flex flex-col items-center justify-center h-full space-y-8">
+                {/* Hero section */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-150" />
+                  <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl gradient-primary shadow-xl">
+                    <Sparkles size={36} className="text-primary-foreground" />
+                  </div>
                 </div>
-                <div className="text-center space-y-2">
-                  <h2 className="text-lg font-semibold">Namaste! 🙏</h2>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    Main aapka AI business assistant hoon. GST, inventory, marketing, salary — kuch bhi puchiye!
-                    <br />
-                    <span className="text-primary font-medium">🎙️ Mic button dabao aur bol ke puchho!</span>
+                <div className="text-center space-y-3 max-w-md">
+                  <h2 className="text-2xl font-bold font-display">Namaste! 🙏</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Main aapka <span className="text-primary font-semibold">AI Business Assistant</span> hoon.
+                    GST, inventory, marketing, salary — kuch bhi puchiye Hindi, English ya Hinglish mein!
                   </p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-primary">
+                    <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
+                      <Mic size={12} /> Voice Input
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
+                      <Zap size={12} /> Instant Answers
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
+                      <BrainCircuit size={12} /> Smart AI
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-lg w-full">
+
+                {/* Suggestion cards */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl w-full">
                   {SUGGESTIONS.map(s => (
-                    <button key={s.text} onClick={() => sendMessage(s.text)}
-                      className="flex items-start gap-2 rounded-xl border border-border bg-card p-3 text-xs text-left hover:bg-accent transition-colors">
-                      <span className="text-base">{s.icon}</span>
-                      <span>{s.text}</span>
+                    <button
+                      key={s.text}
+                      onClick={() => sendMessage(s.text)}
+                      className="group flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left hover:border-primary/40 hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <span className="text-lg">{s.icon}</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{s.category}</span>
+                      </div>
+                      <span className="text-xs leading-relaxed">{s.text}</span>
+                      <ArrowRight size={12} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                     </button>
                   ))}
                 </div>
@@ -219,17 +279,17 @@ export default function Assistant() {
 
             {messages.map((m, i) => (
               <div key={i} className={`flex items-start gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                  m.role === "user" ? "bg-primary/10" : "gradient-primary"
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${
+                  m.role === "user" ? "bg-primary/10 border border-primary/20" : "gradient-primary"
                 }`}>
                   {m.role === "user"
                     ? <User size={16} className="text-primary" />
                     : <Bot size={16} className="text-primary-foreground" />}
                 </div>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
+                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm ${
                   m.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border text-foreground"
+                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    : "bg-card border border-border text-foreground rounded-bl-md"
                 }`}>
                   {m.content}
                   {isLoading && i === messages.length - 1 && m.role === "assistant" && (
@@ -241,10 +301,10 @@ export default function Assistant() {
 
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full gradient-primary">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl gradient-primary shadow-sm">
                   <Bot size={16} className="text-primary-foreground" />
                 </div>
-                <div className="rounded-2xl bg-card border border-border px-4 py-3">
+                <div className="rounded-2xl rounded-bl-md bg-card border border-border px-4 py-3 shadow-sm">
                   <div className="flex gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -255,31 +315,51 @@ export default function Assistant() {
             )}
           </div>
 
-          {/* Input */}
+          {/* Premium Input Bar */}
           <form onSubmit={e => { e.preventDefault(); sendMessage(input); }}
-            className="flex items-center gap-3 mt-3">
+            className="flex items-center gap-3 mt-3 p-3 rounded-2xl border border-border bg-card shadow-sm">
             {isSupported && (
               <Button
                 type="button"
                 variant={isListening ? "destructive" : "outline"}
-                size="lg"
-                className={`shrink-0 rounded-xl ${isListening ? "animate-pulse" : ""}`}
+                size="icon"
+                className={`h-11 w-11 shrink-0 rounded-xl transition-all duration-200 ${
+                  isListening
+                    ? "animate-pulse shadow-lg shadow-destructive/30"
+                    : "hover:bg-primary hover:text-primary-foreground"
+                }`}
                 onClick={isListening ? stopListening : startListening}
                 disabled={isLoading}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
               </Button>
             )}
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder={isListening ? "🎙️ Bol rahe hain... sunne mein aayega" : "Apna sawal yahan likhe... (any language)"}
-              className="flex-1 rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-              disabled={isLoading}
-            />
-            <Button type="submit" size="lg" className="shrink-0 rounded-xl" disabled={!input.trim() || isLoading}>
-              <Send size={18} />
+            <div className="flex-1 relative">
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder={isListening ? "🎙️ Sun raha hoon... bolo!" : "Apna sawal yahan likhe... (Hindi / English / Hinglish)"}
+                className="w-full rounded-xl border-0 bg-muted/50 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60"
+                disabled={isLoading}
+              />
+              {isListening && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5">
+                  <span className="h-3 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "0ms" }} />
+                  <span className="h-4 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
+                  <span className="h-2 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+                  <span className="h-5 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
+                  <span className="h-3 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "400ms" }} />
+                </div>
+              )}
+            </div>
+            <Button
+              type="submit"
+              size="icon"
+              className="h-11 w-11 shrink-0 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all duration-200"
+              disabled={!input.trim() || isLoading}
+            >
+              <Send size={18} className="text-primary-foreground" />
             </Button>
           </form>
         </div>
