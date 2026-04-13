@@ -1,31 +1,39 @@
 import { Copy, Check } from "lucide-react";
-import { useState, lazy, Suspense } from "react";
-
-const SyntaxHighlighter = lazy(() =>
-  import("react-syntax-highlighter/dist/esm/prism-light").then((mod) => ({
-    default: mod.default,
-  }))
-);
-
-const loadTheme = () =>
-  import("react-syntax-highlighter/dist/esm/styles/prism").then(
-    (mod) => mod.oneDark
-  );
+import { useState, useEffect } from "react";
 
 interface CodeBlockProps {
   className?: string;
   children?: React.ReactNode;
 }
 
+let cachedHighlighter: any = null;
+let cachedTheme: any = null;
+let loadingPromise: Promise<void> | null = null;
+
+function loadSyntaxHighlighter() {
+  if (!loadingPromise) {
+    loadingPromise = Promise.all([
+      import("react-syntax-highlighter/dist/esm/prism-light"),
+      import("react-syntax-highlighter/dist/esm/styles/prism"),
+    ]).then(([mod, styles]) => {
+      cachedHighlighter = mod.default;
+      cachedTheme = styles.oneDark;
+    });
+  }
+  return loadingPromise;
+}
+
 export default function CodeBlock({ className, children }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
-  const [theme, setTheme] = useState<Record<string, any> | null>(null);
+  const [loaded, setLoaded] = useState(!!cachedHighlighter);
   const match = /language-(\w+)/.exec(className || "");
   const code = String(children).replace(/\n$/, "");
 
-  if (match && !theme) {
-    loadTheme().then(setTheme);
-  }
+  useEffect(() => {
+    if (match && !cachedHighlighter) {
+      loadSyntaxHighlighter().then(() => setLoaded(true));
+    }
+  }, [match]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -41,6 +49,8 @@ export default function CodeBlock({ className, children }: CodeBlockProps) {
     );
   }
 
+  const SyntaxHighlighter = cachedHighlighter;
+
   return (
     <div className="relative group rounded-lg overflow-hidden my-2">
       <div className="flex items-center justify-between bg-[#282c34] px-4 py-1.5 text-xs text-gray-400">
@@ -53,24 +63,20 @@ export default function CodeBlock({ className, children }: CodeBlockProps) {
           {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      <Suspense
-        fallback={
-          <pre className="bg-[#282c34] text-gray-300 p-4 text-xs font-mono overflow-x-auto">
-            {code}
-          </pre>
-        }
-      >
-        {theme && (
-          <SyntaxHighlighter
-            style={theme}
-            language={match[1]}
-            PreTag="div"
-            customStyle={{ margin: 0, borderRadius: 0, fontSize: "0.75rem" }}
-          >
-            {code}
-          </SyntaxHighlighter>
-        )}
-      </Suspense>
+      {loaded && SyntaxHighlighter ? (
+        <SyntaxHighlighter
+          style={cachedTheme}
+          language={match[1]}
+          PreTag="div"
+          customStyle={{ margin: 0, borderRadius: 0, fontSize: "0.75rem" }}
+        >
+          {code}
+        </SyntaxHighlighter>
+      ) : (
+        <pre className="bg-[#282c34] text-gray-300 p-4 text-xs font-mono overflow-x-auto m-0">
+          {code}
+        </pre>
+      )}
     </div>
   );
 }
