@@ -252,7 +252,7 @@ export default function Assistant() {
           </div>
 
           {/* Chat area */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/40 p-4 md:p-6 space-y-4">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/40 dark:from-background dark:to-muted/20 p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full space-y-8">
                 <div className="relative">
@@ -314,7 +314,7 @@ export default function Assistant() {
                     : "bg-card border border-border text-foreground rounded-bl-md"
                 }`}>
                   {m.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:rounded-lg">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted dark:prose-code:bg-muted/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted dark:prose-pre:bg-muted/60 prose-pre:rounded-lg">
                       <ReactMarkdown components={{ code: ({ className, children }) => <CodeBlock className={className}>{children}</CodeBlock> }}>{m.content}</ReactMarkdown>
                     </div>
                   ) : (
