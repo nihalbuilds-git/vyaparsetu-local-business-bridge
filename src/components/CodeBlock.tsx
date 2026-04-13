@@ -1,7 +1,16 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
+
+const SyntaxHighlighter = lazy(() =>
+  import("react-syntax-highlighter/dist/esm/prism-light").then((mod) => ({
+    default: mod.default,
+  }))
+);
+
+const loadTheme = () =>
+  import("react-syntax-highlighter/dist/esm/styles/prism").then(
+    (mod) => mod.oneDark
+  );
 
 interface CodeBlockProps {
   className?: string;
@@ -10,8 +19,13 @@ interface CodeBlockProps {
 
 export default function CodeBlock({ className, children }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState<Record<string, any> | null>(null);
   const match = /language-(\w+)/.exec(className || "");
   const code = String(children).replace(/\n$/, "");
+
+  if (match && !theme) {
+    loadTheme().then(setTheme);
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -39,14 +53,24 @@ export default function CodeBlock({ className, children }: CodeBlockProps) {
           {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      <SyntaxHighlighter
-        style={oneDark}
-        language={match[1]}
-        PreTag="div"
-        customStyle={{ margin: 0, borderRadius: 0, fontSize: "0.75rem" }}
+      <Suspense
+        fallback={
+          <pre className="bg-[#282c34] text-gray-300 p-4 text-xs font-mono overflow-x-auto">
+            {code}
+          </pre>
+        }
       >
-        {code}
-      </SyntaxHighlighter>
+        {theme && (
+          <SyntaxHighlighter
+            style={theme}
+            language={match[1]}
+            PreTag="div"
+            customStyle={{ margin: 0, borderRadius: 0, fontSize: "0.75rem" }}
+          >
+            {code}
+          </SyntaxHighlighter>
+        )}
+      </Suspense>
     </div>
   );
 }
