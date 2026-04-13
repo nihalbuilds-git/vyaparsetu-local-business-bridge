@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import CodeBlock from "@/components/CodeBlock";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/AppLayout";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -294,7 +295,7 @@ export default function Assistant() {
                 }`}>
                   {m.role === "assistant" ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:rounded-lg">
-                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                      <ReactMarkdown components={{ code: ({ className, children }) => <CodeBlock className={className}>{children}</CodeBlock> }}>{m.content}</ReactMarkdown>
                     </div>
                   ) : (
                     m.content
