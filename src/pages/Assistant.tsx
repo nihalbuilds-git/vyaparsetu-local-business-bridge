@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight } from "lucide-react";
+import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import CodeBlock from "@/components/CodeBlock";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ const SUGGESTIONS = [
 export default function Assistant() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
@@ -124,22 +125,44 @@ export default function Assistant() {
 
   return (
     <AppLayout>
-      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-4">
-        {/* Sidebar - conversation history */}
-        <div className="hidden md:flex w-72 flex-col rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] relative">
+        {/* Overlay for mobile when sidebar is open */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sliding sidebar */}
+        <div
+          className={`fixed md:relative z-40 top-0 left-0 h-full w-72 flex flex-col bg-card border-r border-border shadow-xl md:shadow-sm transition-all duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <div className="gradient-primary px-4 py-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-primary-foreground flex items-center gap-2">
                 <Clock size={14} /> Chat History
               </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
-                onClick={newChat}
-              >
-                <Plus size={16} />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
+                  onClick={newChat}
+                >
+                  <Plus size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <PanelLeftClose size={16} />
+                </Button>
+              </div>
             </div>
             <p className="text-[10px] text-primary-foreground/70 mt-1">
               {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
@@ -161,7 +184,7 @@ export default function Assistant() {
                     ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
                     : "hover:bg-accent border border-transparent"
                 }`}
-                onClick={() => loadMessages(c.id)}
+                onClick={() => { loadMessages(c.id); setSidebarOpen(false); }}
               >
                 <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                   activeConversationId === c.id ? "gradient-primary" : "bg-muted"
@@ -185,25 +208,34 @@ export default function Assistant() {
         </div>
 
         {/* Main chat area */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col w-full">
           {/* Premium Header */}
           <div className="flex items-center justify-between mb-4 p-4 rounded-2xl gradient-primary shadow-lg">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {/* Sidebar toggle button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0 text-primary-foreground hover:bg-white/20 rounded-xl border border-white/20"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <PanelLeftOpen size={18} />
+              </Button>
               <div className="relative">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm border border-white/30">
-                  <BrainCircuit size={24} className="text-primary-foreground" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm border border-white/30">
+                  <BrainCircuit size={20} className="text-primary-foreground" />
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green-400 border-2 border-primary" />
+                <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-primary-foreground font-display flex items-center gap-2">
+                <h1 className="text-base font-bold text-primary-foreground font-display flex items-center gap-2">
                   VyaparSetu AI
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
                     <Zap size={8} /> PRO
                   </span>
                 </h1>
-                <p className="text-xs text-primary-foreground/80">
-                  Smart Business Advisor • Multi-language • Voice enabled 🎙️
+                <p className="text-[11px] text-primary-foreground/80">
+                  Smart Business Advisor • Multi-language • Voice 🎙️
                 </p>
               </div>
             </div>
@@ -211,21 +243,11 @@ export default function Assistant() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="md:hidden text-primary-foreground hover:bg-white/20 rounded-lg"
+                className="text-primary-foreground hover:bg-white/20 rounded-lg"
                 onClick={newChat}
               >
-                <Plus size={14} className="mr-1" /> New
+                <Plus size={14} className="mr-1" /> New Chat
               </Button>
-              {messages.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-primary-foreground hover:bg-white/20 rounded-lg hidden md:flex"
-                  onClick={newChat}
-                >
-                  <Plus size={14} className="mr-1" /> New Chat
-                </Button>
-              )}
             </div>
           </div>
 
@@ -233,7 +255,6 @@ export default function Assistant() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/40 p-4 md:p-6 space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full space-y-8">
-                {/* Hero section */}
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-150" />
                   <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl gradient-primary shadow-xl">
@@ -259,7 +280,6 @@ export default function Assistant() {
                   </div>
                 </div>
 
-                {/* Suggestion cards */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl w-full">
                   {SUGGESTIONS.map(s => (
                     <button
@@ -323,7 +343,7 @@ export default function Assistant() {
             )}
           </div>
 
-          {/* Premium Input Bar */}
+          {/* Input Bar */}
           <form onSubmit={e => { e.preventDefault(); sendMessage(input); }}
             className="flex items-center gap-3 mt-3 p-3 rounded-2xl border border-border bg-card shadow-sm">
             {isSupported && (
