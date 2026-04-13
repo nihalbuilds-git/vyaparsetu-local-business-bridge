@@ -368,7 +368,7 @@ export default function Assistant() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 placeholder={isListening ? "🎙️ Sun raha hoon... bolo!" : "Apna sawal yahan likhe... (Hindi / English / Hinglish)"}
-                className="w-full rounded-xl border-0 bg-muted/50 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60"
+                className="w-full rounded-xl border-0 bg-muted/50 dark:bg-muted/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60"
                 disabled={isLoading}
               />
               {isListening && (
