@@ -1,12 +1,14 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight, X } from "lucide-react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { Send, Bot, User, Sparkles, Trash2, Mic, MicOff, Plus, MessageSquare, Clock, Zap, BrainCircuit, ArrowRight, X, ArrowUp } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import CodeBlock from "@/components/CodeBlock";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/components/AppLayout";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useChatHistory } from "@/hooks/use-chat-history";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -23,9 +25,9 @@ const SUGGESTIONS = [
 
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning! ☀️";
-  if (hour < 17) return "Good Afternoon! 🌤️";
-  return "Good Evening! 🌙";
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
 }
 
 export default function Assistant() {
@@ -33,7 +35,7 @@ export default function Assistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
   const {
     conversations, activeConversationId, messages, setMessages,
@@ -50,7 +52,15 @@ export default function Assistant() {
     if (transcript) setInput(transcript);
   }, [transcript]);
 
-  const sendMessage = async (text: string) => {
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+    }
+  }, [input]);
+
+  const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
     if (isListening) stopListening();
     const userMsg: Msg = { role: "user", content: text.trim() };
@@ -129,194 +139,196 @@ export default function Assistant() {
     }
 
     setIsLoading(false);
-    inputRef.current?.focus();
-  };
+    textareaRef.current?.focus();
+  }, [isLoading, isListening, messages, activeConversationId, stopListening, setMessages, createConversation, saveMessage]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+  }, [input, sendMessage]);
+
+  const hasContent = input.trim().length > 0;
+  const canSend = hasContent && !isLoading;
 
   return (
     <AppLayout>
       <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] flex-col relative">
-        {/* Premium Header */}
-        <div className="flex items-center justify-between mb-4 p-4 rounded-2xl gradient-primary shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm border border-white/30">
-                <BrainCircuit size={20} className="text-primary-foreground" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-primary" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-primary-foreground font-display flex items-center gap-2">
-                VyaparSetu AI
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
-                  <Zap size={8} /> PRO
-                </span>
-              </h1>
-              <p className="text-[11px] text-primary-foreground/80">
-                Smart Business Advisor • Multi-language • Voice 🎙️
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary-foreground hover:bg-white/20 rounded-lg"
-              onClick={() => setHistoryOpen(true)}
-            >
-              <Clock size={14} className="mr-1" /> History
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary-foreground hover:bg-white/20 rounded-lg"
-              onClick={newChat}
-            >
-              <Plus size={14} className="mr-1" /> New Chat
-            </Button>
-          </div>
-        </div>
-
-        {/* Chat area */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/40 dark:from-background dark:to-muted/20 p-4 md:p-6 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full space-y-8">
-              <div className="relative">
-                <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-150" />
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl gradient-primary shadow-xl">
-                  <Sparkles size={36} className="text-primary-foreground" />
+        {/* Chat messages area */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+          {messages.length === 0 ? (
+            /* Empty state - Claude-style centered greeting */
+            <div className="flex flex-col items-center justify-center h-full px-4">
+              <div className="max-w-2xl w-full space-y-8">
+                <div className="text-center space-y-2">
+                  <h1 className="text-3xl md:text-4xl font-light text-foreground/80 font-display">
+                    {greeting}, what can I help with?
+                  </h1>
                 </div>
-              </div>
-              <div className="text-center space-y-3 max-w-md">
-                <h2 className="text-2xl font-bold font-display">{greeting}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  I'm your <span className="text-primary font-semibold">AI Business Assistant</span>.
-                  Ask me anything about GST, inventory, marketing, salary — in Hindi, English, or Hinglish!
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs text-primary">
-                  <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
-                    <Mic size={12} /> Voice Input
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                  {SUGGESTIONS.map(s => (
+                    <button
+                      key={s.text}
+                      onClick={() => sendMessage(s.text)}
+                      className="group flex flex-col gap-2 rounded-xl border border-border bg-card/50 hover:bg-card p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{s.icon}</span>
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{s.category}</span>
+                      </div>
+                      <span className="text-xs leading-relaxed text-foreground/80">{s.text}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5">
+                    <Mic size={11} /> Voice
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
-                    <Zap size={12} /> Instant Answers
+                  <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5">
+                    <Zap size={11} /> Instant
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 font-medium">
-                    <BrainCircuit size={12} /> Smart AI
+                  <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5">
+                    <BrainCircuit size={11} /> Multi-language
                   </div>
                 </div>
               </div>
+            </div>
+          ) : (
+            /* Messages */
+            <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-5">
+              {messages.map((m, i) => (
+                <div key={i} className={cn("flex items-start gap-3", m.role === "user" && "flex-row-reverse")}>
+                  <div className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                    m.role === "user" ? "bg-primary/10" : "gradient-primary"
+                  )}>
+                    {m.role === "user"
+                      ? <User size={14} className="text-primary" />
+                      : <Bot size={14} className="text-primary-foreground" />}
+                  </div>
+                  <div className={cn(
+                    "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
+                    m.role === "user"
+                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      : "bg-card border border-border rounded-bl-sm"
+                  )}>
+                    {m.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted dark:prose-code:bg-muted/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted dark:prose-pre:bg-muted/60 prose-pre:rounded-lg">
+                        <ReactMarkdown components={{ code: ({ className, children }) => <CodeBlock className={className}>{children}</CodeBlock> }}>{m.content}</ReactMarkdown>
+                      </div>
+                    ) : m.content}
+                    {isLoading && i === messages.length - 1 && m.role === "assistant" && (
+                      <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 rounded-sm" />
+                    )}
+                  </div>
+                </div>
+              ))}
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl w-full">
-                {SUGGESTIONS.map(s => (
-                  <button
-                    key={s.text}
-                    onClick={() => sendMessage(s.text)}
-                    className="group flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left hover:border-primary/40 hover:shadow-md transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-2 w-full">
-                      <span className="text-lg">{s.icon}</span>
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{s.category}</span>
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full gradient-primary">
+                    <Bot size={14} className="text-primary-foreground" />
+                  </div>
+                  <div className="rounded-2xl rounded-bl-sm bg-card border border-border px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
-                    <span className="text-xs leading-relaxed">{s.text}</span>
-                    <ArrowRight size={12} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {messages.map((m, i) => (
-            <div key={i} className={`flex items-start gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${
-                m.role === "user" ? "bg-primary/10 border border-primary/20" : "gradient-primary"
-              }`}>
-                {m.role === "user"
-                  ? <User size={16} className="text-primary" />
-                  : <Bot size={16} className="text-primary-foreground" />}
-              </div>
-              <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                m.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-br-md whitespace-pre-wrap"
-                  : "bg-card border border-border text-foreground rounded-bl-md"
-              }`}>
-                {m.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:bg-muted dark:prose-code:bg-muted/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted dark:prose-pre:bg-muted/60 prose-pre:rounded-lg">
-                    <ReactMarkdown components={{ code: ({ className, children }) => <CodeBlock className={className}>{children}</CodeBlock> }}>{m.content}</ReactMarkdown>
                   </div>
-                ) : (
-                  m.content
-                )}
-                {isLoading && i === messages.length - 1 && m.role === "assistant" && (
-                  <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 rounded-sm" />
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isLoading && messages[messages.length - 1]?.role === "user" && (
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl gradient-primary shadow-sm">
-                <Bot size={16} className="text-primary-foreground" />
-              </div>
-              <div className="rounded-2xl rounded-bl-md bg-card border border-border px-4 py-3 shadow-sm">
-                <div className="flex gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Input Bar */}
-        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }}
-          className="flex items-center gap-3 mt-3 p-3 rounded-2xl border border-border bg-card shadow-sm">
-          {isSupported && (
-            <Button
-              type="button"
-              variant={isListening ? "destructive" : "outline"}
-              size="icon"
-              className={`h-11 w-11 shrink-0 rounded-xl transition-all duration-200 ${
-                isListening
-                  ? "animate-pulse shadow-lg shadow-destructive/30"
-                  : "hover:bg-primary hover:text-primary-foreground"
-              }`}
-              onClick={isListening ? stopListening : startListening}
-              disabled={isLoading}
-            >
-              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-            </Button>
-          )}
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
+        {/* Claude-style input bar */}
+        <div className="max-w-3xl mx-auto w-full px-4 pb-3 pt-2">
+          <div className={cn(
+            "relative rounded-2xl border border-border bg-card shadow-sm transition-all",
+            "focus-within:border-primary/40 focus-within:shadow-md"
+          )}>
+            <Textarea
+              ref={textareaRef}
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={isListening ? "🎙️ Listening... speak now!" : "Type your question here... (Hindi / English / Hinglish)"}
-              className="w-full rounded-xl border-0 bg-muted/50 dark:bg-muted/30 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60"
+              onKeyDown={handleKeyDown}
+              placeholder={isListening ? "🎙️ Listening... speak now!" : "Ask anything about your business..."}
               disabled={isLoading}
+              className="min-h-[52px] max-h-[160px] w-full resize-none border-0 bg-transparent px-4 pt-3.5 pb-0 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
+              rows={1}
             />
-            {isListening && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5">
-                <span className="h-3 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "0ms" }} />
-                <span className="h-4 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
-                <span className="h-2 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
-                <span className="h-5 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-                <span className="h-3 w-0.5 bg-destructive rounded-full animate-pulse" style={{ animationDelay: "400ms" }} />
-              </div>
-            )}
-          </div>
-          <Button
-            type="submit"
-            size="icon"
-            className="h-11 w-11 shrink-0 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all duration-200"
-            disabled={!input.trim() || isLoading}
-          >
-            <Send size={18} className="text-primary-foreground" />
-          </Button>
-        </form>
 
-        {/* History Modal Overlay */}
+            {/* Bottom toolbar */}
+            <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center gap-1">
+                {isSupported && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      isListening
+                        ? "text-destructive bg-destructive/10 animate-pulse"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={isListening ? stopListening : startListening}
+                    disabled={isLoading}
+                    title={isListening ? "Stop listening" : "Voice input"}
+                  >
+                    {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                  onClick={() => setHistoryOpen(true)}
+                  title="Chat history"
+                >
+                  <Clock size={16} />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                  onClick={newChat}
+                  title="New chat"
+                >
+                  <Plus size={16} />
+                </Button>
+              </div>
+
+              <Button
+                type="button"
+                size="icon"
+                className={cn(
+                  "h-8 w-8 rounded-lg transition-all",
+                  canSend
+                    ? "gradient-primary text-primary-foreground shadow-sm hover:shadow-md"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                )}
+                onClick={() => sendMessage(input)}
+                disabled={!canSend}
+                title="Send message"
+              >
+                <ArrowUp size={16} />
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
+            VyaparSetu AI PRO • Hindi / English / Hinglish
+          </p>
+        </div>
+
+        {/* History Drawer */}
         {historyOpen && (
           <>
             <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setHistoryOpen(false)} />
@@ -331,20 +343,12 @@ export default function Assistant() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
-                    onClick={() => { newChat(); setHistoryOpen(false); }}
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
+                    onClick={() => { newChat(); setHistoryOpen(false); }}>
                     <Plus size={16} />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
-                    onClick={() => setHistoryOpen(false)}
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-white/20 rounded-lg"
+                    onClick={() => setHistoryOpen(false)}>
                     <X size={16} />
                   </Button>
                 </div>
@@ -360,27 +364,27 @@ export default function Assistant() {
                 {conversations.map(c => (
                   <div
                     key={c.id}
-                    className={`group flex items-center gap-2.5 rounded-xl p-2.5 text-xs cursor-pointer transition-all duration-200 ${
+                    className={cn(
+                      "group flex items-center gap-2.5 rounded-xl p-2.5 text-xs cursor-pointer transition-all duration-200",
                       activeConversationId === c.id
-                        ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
+                        ? "bg-primary/10 text-primary border border-primary/20"
                         : "hover:bg-accent border border-transparent"
-                    }`}
+                    )}
                     onClick={() => { loadMessages(c.id); setHistoryOpen(false); }}
                   >
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                    <div className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                       activeConversationId === c.id ? "gradient-primary" : "bg-muted"
-                    }`}>
+                    )}>
                       <MessageSquare size={12} className={activeConversationId === c.id ? "text-primary-foreground" : "text-muted-foreground"} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="truncate font-semibold">{c.title}</p>
                       <p className="text-[10px] text-muted-foreground">{format(new Date(c.updated_at), "dd MMM, HH:mm")}</p>
                     </div>
-                    <Button
-                      variant="ghost" size="icon"
+                    <Button variant="ghost" size="icon"
                       className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0 hover:text-destructive"
-                      onClick={e => { e.stopPropagation(); deleteConversation(c.id); }}
-                    >
+                      onClick={e => { e.stopPropagation(); deleteConversation(c.id); }}>
                       <Trash2 size={11} />
                     </Button>
                   </div>
