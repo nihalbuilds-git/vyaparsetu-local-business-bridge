@@ -2,3 +2,6 @@ project_id = "frahzhlxutbfeaororpm"
 
 [functions.generate-campaign]
 verify_jwt = false
+
+[functions.razorpay-webhook]
+verify_jwt = false
