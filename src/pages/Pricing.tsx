@@ -5,8 +5,9 @@ import { useI18n } from "@/lib/i18n";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Crown, Sparkles, Zap } from "lucide-react";
+import { Check, Crown, Sparkles, Zap, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { openRazorpayCheckout } from "@/lib/razorpay";
 
 const plans = [
   {
