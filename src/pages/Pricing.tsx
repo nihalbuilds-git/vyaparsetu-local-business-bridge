@@ -52,6 +52,7 @@ export default function Pricing() {
   const { toast } = useToast();
   const [currentPlan, setCurrentPlan] = useState("free");
   const [loading, setLoading] = useState(true);
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -62,20 +63,74 @@ export default function Pricing() {
   }, [user]);
 
   const handleSelectPlan = async (planId: string) => {
-    if (planId === currentPlan) return;
-    if (planId === "free") {
-      // Downgrade
-      if (!user) return;
-      await supabase.from("user_subscriptions").upsert({ user_id: user.id, plan: "free" }, { onConflict: "user_id" });
-      setCurrentPlan("free");
-      toast({ title: lang === "hi" ? "प्लान बदला गया" : "Plan changed" });
+    if (planId === currentPlan || processingPlan) return;
+    if (!user) {
+      toast({ title: lang === "hi" ? "कृपया लॉगिन करें" : "Please log in first", variant: "destructive" });
       return;
     }
-    // For paid plans - show coming soon
-    toast({
-      title: lang === "hi" ? "जल्द आ रहा है!" : "Coming Soon!",
-      description: lang === "hi" ? "भुगतान एकीकरण जल्द ही उपलब्ध होगा। अभी सभी सुविधाएँ मुफ़्त हैं!" : "Payment integration coming soon. All features are free for now!",
-    });
+
+    if (planId === "free") {
+      await supabase.from("user_subscriptions").upsert(
+        { user_id: user.id, plan: "free", status: "active" },
+        { onConflict: "user_id" }
+      );
+      setCurrentPlan("free");
+      toast({ title: lang === "hi" ? "प्लान बदला गया" : "Plan changed to Free" });
+      return;
+    }
+
+    setProcessingPlan(planId);
+    try {
+      // 1. Create Razorpay order via edge function
+      const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
+        body: { plan: planId },
+      });
+      if (error) throw error;
+      if (!data?.order_id || !data?.key_id) {
+        throw new Error(data?.error || "Failed to create order. Razorpay credentials may not be configured yet.");
+      }
+
+      // 2. Open Razorpay Checkout
+      await openRazorpayCheckout({
+        keyId: data.key_id,
+        orderId: data.order_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: "VyaparSetu",
+        description: `${planId.toUpperCase()} Plan — Monthly Subscription`,
+        prefill: { email: user.email || "" },
+        themeColor: "#e27214",
+        onSuccess: async (resp) => {
+          const verify = await supabase.functions.invoke("razorpay-verify-payment", {
+            body: { ...resp, plan: planId },
+          });
+          if (verify.error || !verify.data?.success) {
+            toast({
+              title: lang === "hi" ? "सत्यापन विफल" : "Verification failed",
+              description: verify.error?.message || "Payment could not be verified.",
+              variant: "destructive",
+            });
+          } else {
+            setCurrentPlan(planId);
+            toast({
+              title: lang === "hi" ? "🎉 भुगतान सफल!" : "🎉 Payment successful!",
+              description: lang === "hi"
+                ? `आपका ${planId.toUpperCase()} प्लान सक्रिय हो गया है।`
+                : `Your ${planId.toUpperCase()} plan is now active.`,
+            });
+          }
+          setProcessingPlan(null);
+        },
+        onDismiss: () => setProcessingPlan(null),
+      });
+    } catch (err: any) {
+      toast({
+        title: lang === "hi" ? "त्रुटि" : "Error",
+        description: err?.message || "Something went wrong.",
+        variant: "destructive",
+      });
+      setProcessingPlan(null);
+    }
   };
 
   return (
