@@ -180,13 +180,22 @@ export default function Pricing() {
 
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}
-                    disabled={loading}
+                    disabled={loading || processingPlan !== null}
                     className={`w-full ${plan.popular ? "gradient-primary text-primary-foreground" : ""}`}
                     variant={plan.popular ? "default" : "outline"}
                   >
-                    {isCurrentPlan
-                      ? (lang === "hi" ? "वर्तमान प्लान" : "Current Plan")
-                      : (lang === "hi" ? "चुनें" : "Select Plan")}
+                    {processingPlan === plan.id ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                        {lang === "hi" ? "प्रोसेसिंग..." : "Processing..."}
+                      </span>
+                    ) : isCurrentPlan ? (
+                      lang === "hi" ? "वर्तमान प्लान" : "Current Plan"
+                    ) : plan.id === "free" ? (
+                      lang === "hi" ? "मुफ़्त में शुरू करें" : "Start Free"
+                    ) : (
+                      lang === "hi" ? "अभी अपग्रेड करें" : "Upgrade Now"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -195,7 +204,9 @@ export default function Pricing() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          {lang === "hi" ? "✓ सभी सुविधाएँ अभी मुफ़्त हैं · भुगतान जल्द ही उपलब्ध होगा" : "✓ All features are free during beta · Payment integration coming soon"}
+          {lang === "hi"
+            ? "🔒 सुरक्षित भुगतान · Razorpay द्वारा संचालित · UPI, कार्ड, नेटबैंकिंग समर्थित"
+            : "🔒 Secure payments · Powered by Razorpay · UPI, Cards & Netbanking supported"}
         </p>
       </div>
     </AppLayout>
