@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -8,19 +9,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { User, Store, MapPin, Tag, Mail, Shield } from "lucide-react";
+import { Store, MapPin, Tag, Mail, Shield, Download, Trash2, Lock } from "lucide-react";
+import { exportAllUserData } from "@/lib/data-export";
 
 const categories = ["Grocery", "Electronics", "Clothing", "General Store"];
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { t, lang } = useI18n();
   const [saving, setSaving] = useState(false);
   const [existingId, setExistingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", address: "", category: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
+  const handleExport = async () => {
+    if (!user) return;
+    setExporting(true);
+    try {
+      await exportAllUserData(user.id);
+      toast({ title: lang === "hi" ? "डेटा डाउनलोड हो गया" : "Data downloaded" });
+    } catch (e: any) {
+      toast({ title: t("error"), description: e.message, variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (confirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke("delete-account", { body: {} });
+      if (error) throw error;
+      toast({ title: lang === "hi" ? "खाता हटा दिया गया" : "Account deleted" });
+      await signOut();
+      navigate("/");
+    } catch (e: any) {
+      toast({ title: t("error"), description: e.message, variant: "destructive" });
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -166,6 +201,78 @@ export default function Profile() {
             >
               {saving ? t("saving") : t("save")}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Privacy & Data Card (DPDP Act 2023) */}
+        <Card className="rounded-2xl border-border/40 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/5 to-accent px-5 py-3 border-b border-border/40 flex items-center gap-2">
+            <Lock size={16} className="text-primary" />
+            <h3 className="font-bold font-display text-sm text-foreground">
+              {lang === "hi" ? "गोपनीयता और डेटा" : "Privacy & Data"}
+            </h3>
+          </div>
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{lang === "hi" ? "अपना डेटा डाउनलोड करें" : "Download your data"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{lang === "hi" ? "DPDP Act के तहत आपके सभी डेटा का JSON निर्यात" : "Full JSON export of all your data (DPDP Act right)"}</p>
+              </div>
+              <Button onClick={handleExport} disabled={exporting} variant="outline" size="sm" className="shrink-0 rounded-xl gap-1.5">
+                <Download size={14} /> {exporting ? "..." : (lang === "hi" ? "निर्यात" : "Export")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Danger Zone */}
+        <Card className="rounded-2xl border-destructive/30 shadow-sm overflow-hidden">
+          <div className="bg-destructive/5 px-5 py-3 border-b border-destructive/20 flex items-center gap-2">
+            <Trash2 size={16} className="text-destructive" />
+            <h3 className="font-bold font-display text-sm text-destructive">
+              {lang === "hi" ? "खतरनाक ज़ोन" : "Danger Zone"}
+            </h3>
+          </div>
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{lang === "hi" ? "खाता स्थायी रूप से हटाएं" : "Delete account permanently"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{lang === "hi" ? "यह सब डेटा हमेशा के लिए हटा देगा — वापस नहीं किया जा सकता।" : "All data will be erased forever — cannot be undone."}</p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="shrink-0 rounded-xl gap-1.5">
+                    <Trash2 size={14} /> {lang === "hi" ? "हटाएं" : "Delete"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{lang === "hi" ? "क्या आप पक्के में हटाना चाहते हैं?" : "Are you absolutely sure?"}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {lang === "hi"
+                        ? "यह आपका खाता, सभी workers, खाता, इन्वेंटरी, इनवॉइस — सब कुछ हमेशा के लिए हटा देगा।"
+                        : "This will permanently delete your account, all workers, khata, inventory, invoices — everything. Type DELETE to confirm."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Input
+                    placeholder='Type "DELETE" to confirm'
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    className="rounded-xl"
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setConfirmText("")} className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={confirmText !== "DELETE" || deleting}
+                      onClick={handleDelete}
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleting ? "Deleting..." : "Delete forever"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,6 @@
+import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import { Github, Linkedin, Mail } from "lucide-react";
 
 export default function LandingFooter() {
   const { t } = useI18n();
@@ -39,6 +39,13 @@ export default function LandingFooter() {
             <p className="text-xs text-muted-foreground">© 2026 VyaparSetu</p>
             <p className="text-[11px] text-muted-foreground/60">All rights reserved</p>
           </div>
+        </div>
+
+        {/* Legal links */}
+        <div className="mt-6 pt-5 border-t border-border/40 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <Link to="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium">Privacy Policy</Link>
+          <Link to="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium">Terms of Service</Link>
+          <Link to="/refund" className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium">Refund Policy</Link>
         </div>
       </div>
     </footer>
