@@ -30,7 +30,11 @@ import WhatsAppRemindersPage from "./pages/WhatsAppReminders";
 import Reports from "./pages/Reports";
 import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/legal/Privacy";
+import Terms from "./pages/legal/Terms";
+import Refund from "./pages/legal/Refund";
 import AIChatWidget from "./components/AIChatWidget";
+import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +58,9 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/refund" element={<Refund />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/workers" element={<ProtectedRoute><Workers /></ProtectedRoute>} />
               <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
@@ -80,6 +87,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <AIChatWidget />
+            <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
