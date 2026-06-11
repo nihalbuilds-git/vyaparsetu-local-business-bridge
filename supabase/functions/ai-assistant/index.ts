@@ -35,10 +35,37 @@ RULES:
 - NEVER refuse to answer a question — always try your best to help
 - For sensitive topics (legal/medical), give general guidance but recommend consulting a professional`;
 
+// Simple in-memory rate limiter (per edge instance): 20 requests / 60s per identity
+const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(id: string): boolean {
+  const now = Date.now();
+  const bucket = rateBuckets.get(id);
+  if (!bucket || bucket.resetAt < now) {
+    rateBuckets.set(id, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (bucket.count >= RATE_LIMIT) return false;
+  bucket.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const identity =
+      req.headers.get("authorization")?.slice(-32) ||
+      req.headers.get("x-forwarded-for") ||
+      "anon";
+    if (!checkRateLimit(identity)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please wait a minute and try again." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "messages array is required" }), {
