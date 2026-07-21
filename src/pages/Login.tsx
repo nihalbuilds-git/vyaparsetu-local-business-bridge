@@ -75,7 +75,7 @@ export default function Login() {
       const formatted = formatPhone(phone);
       const { error } = await supabase.auth.verifyOtp({ phone: formatted, token: otp, type: "sms" });
       if (error) throw error;
-      navigate("/dashboard");
+      navigate(nextPath, { replace: true });
     } catch (err: any) {
       toast({ title: t("verificationFailed"), description: err.message, variant: "destructive" });
     } finally {
@@ -99,7 +99,7 @@ export default function Login() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/dashboard");
+        navigate(nextPath, { replace: true });
       }
     } catch (err: any) {
       toast({ title: t("error"), description: err.message, variant: "destructive" });
