@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useI18n } from "@/lib/i18n";
@@ -26,12 +26,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get("next");
+  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
   const { user } = useAuth();
   const { t, lang, setLang } = useI18n();
 
   useEffect(() => {
-    if (user) navigate("/dashboard");
-  }, [user, navigate]);
+    if (user) navigate(nextPath, { replace: true });
+  }, [user, navigate, nextPath]);
 
   const formatPhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -72,7 +75,7 @@ export default function Login() {
       const formatted = formatPhone(phone);
       const { error } = await supabase.auth.verifyOtp({ phone: formatted, token: otp, type: "sms" });
       if (error) throw error;
-      navigate("/dashboard");
+      navigate(nextPath, { replace: true });
     } catch (err: any) {
       toast({ title: t("verificationFailed"), description: err.message, variant: "destructive" });
     } finally {
@@ -96,7 +99,7 @@ export default function Login() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/dashboard");
+        navigate(nextPath, { replace: true });
       }
     } catch (err: any) {
       toast({ title: t("error"), description: err.message, variant: "destructive" });
@@ -109,7 +112,7 @@ export default function Login() {
     setLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + nextPath,
       });
       if (error) throw error;
     } catch (err: any) {

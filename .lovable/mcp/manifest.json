@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://frahzhlxutbfeaororpm.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "vyaparsetu-mcp",
+      "version": "0.1.0",
+      "title": "VyaparSetu"
+    },
+    "tools": [
+      {
+        "name": "get_business_profile",
+        "title": "Get business profile",
+        "description": "Returns the signed-in user's VyaparSetu business profile(s): name, category, address.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_workers",
+        "title": "List workers",
+        "description": "List all workers (employees) for the signed-in user's business with name, role, phone, and daily salary.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_khata_entries",
+        "title": "List Khata entries",
+        "description": "List credit/debit ledger (Khata) entries for the signed-in user's business. Optionally filter by customer name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "customer_name": {
+              "type": "string",
+              "description": "Optional: filter by customer name (partial match)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Max rows (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_khata_entry",
+        "title": "Add Khata entry",
+        "description": "Add a credit ('given') or debit ('received') Khata entry for a customer of the signed-in user's business.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "business_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Business ID (get from get_business_profile)."
+            },
+            "customer_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "amount": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "entry_type": {
+              "type": "string",
+              "enum": [
+                "given",
+                "received"
+              ],
+              "description": "'given' = credit given to customer (they owe you). 'received' = payment received."
+            },
+            "customer_phone": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "business_id",
+            "customer_name",
+            "amount",
+            "entry_type"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_inventory",
+        "title": "List inventory",
+        "description": "List all inventory items (stock) for the signed-in user's business with quantity, unit, and price.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "low_stock_only": {
+              "type": "boolean",
+              "description": "If true, only return items at or below their low-stock threshold."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_expenses",
+        "title": "List expenses",
+        "description": "List recent expenses for the signed-in user's business.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
