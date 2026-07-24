@@ -1,9 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+async function audit(userId: string | null, event: string, status: string, metadata: Record<string, unknown> = {}) {
+  if (!userId) return;
+  try {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    await admin.from("audit_logs").insert({ user_id: userId, event_type: event, status, metadata });
+  } catch (_) { /* silent */ }
+}
+
+async function userIdFromAuth(authHeader: string | null): Promise<string | null> {
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  try {
+    const client = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data } = await client.auth.getUser(authHeader.replace("Bearer ", ""));
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
 
 const SYSTEM_PROMPT = `You are "VyaparSetu AI" — an incredibly smart, versatile, and friendly AI assistant. You can help with ANYTHING the user asks.
 
