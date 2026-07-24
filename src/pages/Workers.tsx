@@ -85,10 +85,12 @@ export default function Workers() {
     const { error } = await supabase.storage.from("worker-avatars").upload(path, avatarFile, { upsert: true });
     if (error) {
       toast({ title: t("uploadFailed"), description: error.message, variant: "destructive" });
+      logAudit("storage.upload", { resource: `worker-avatars/${path}`, status: "error", metadata: { message: error.message } });
       return null;
     }
-    const { data: urlData } = supabase.storage.from("worker-avatars").getPublicUrl(path);
-    return urlData.publicUrl;
+    logAudit("storage.upload", { resource: `worker-avatars/${path}` });
+    // Store the path (not a URL) so we can mint fresh signed URLs on read.
+    return path;
   };
 
   const handleSave = async () => {
