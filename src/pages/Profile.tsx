@@ -222,6 +222,15 @@ export default function Profile() {
                 <Download size={14} /> {exporting ? "..." : (lang === "hi" ? "निर्यात" : "Export")}
               </Button>
             </div>
+            <div className="flex items-start justify-between gap-3 pt-3 border-t border-border/40">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{lang === "hi" ? "सुरक्षा गतिविधि" : "Security activity log"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{lang === "hi" ? "लॉगिन, फाइल अपलोड और संदिग्ध गतिविधि देखें" : "Review sign-ins, uploads and suspicious activity"}</p>
+              </div>
+              <Button onClick={() => navigate("/security-log")} variant="outline" size="sm" className="shrink-0 rounded-xl gap-1.5">
+                <Shield size={14} /> {lang === "hi" ? "देखें" : "View"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
