@@ -51,7 +51,19 @@ export default function Workers() {
     const { data: biz } = await supabase.from("businesses").select("id").eq("owner_id", user.id).maybeSingle();
     if (biz) setBusinessId(biz.id);
     const { data } = await supabase.from("workers").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    setWorkers((data as Worker[]) || []);
+    const list = (data as Worker[]) || [];
+    // Resolve avatar paths to short-lived signed URLs (bucket is private).
+    const paths = list.map((w) => extractStoragePath("worker-avatars", w.avatar_url)).filter(Boolean) as string[];
+    if (paths.length) {
+      const { data: signed } = await supabase.storage.from("worker-avatars").createSignedUrls(paths, 3600);
+      const map = new Map<string, string>();
+      (signed || []).forEach((s) => { if (s.path && s.signedUrl) map.set(s.path, s.signedUrl); });
+      list.forEach((w) => {
+        const p = extractStoragePath("worker-avatars", w.avatar_url);
+        if (p && map.has(p)) w.avatar_url = map.get(p)!;
+      });
+    }
+    setWorkers(list);
     setLoading(false);
   };
 
