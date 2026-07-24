@@ -34,6 +34,7 @@ import Privacy from "./pages/legal/Privacy";
 import Terms from "./pages/legal/Terms";
 import Refund from "./pages/legal/Refund";
 import OAuthConsent from "./pages/OAuthConsent";
+import SecurityLog from "./pages/SecurityLog";
 import AIChatWidget from "./components/AIChatWidget";
 import CookieConsent from "./components/CookieConsent";
 
