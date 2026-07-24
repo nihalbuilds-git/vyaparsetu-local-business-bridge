@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2, Camera, Users, Phone, Briefcase, IndianRupee, Search } from "lucide-react";
+import { extractStoragePath, logAudit } from "@/lib/audit";
 
 interface Worker {
   id: string;
