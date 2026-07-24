@@ -19,10 +19,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      // Audit auth lifecycle events (fire-and-forget).
+      if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "PASSWORD_RECOVERY")) {
+        void import("@/lib/audit").then(({ logAudit }) =>
+          logAudit(`auth.${event.toLowerCase()}`, { resource: session.user.id, metadata: { provider: session.user.app_metadata?.provider } })
+        );
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,6 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    const uid = user?.id;
+    if (uid) {
+      const { logAudit } = await import("@/lib/audit");
+      await logAudit("auth.signed_out", { resource: uid });
+    }
     await supabase.auth.signOut();
   };
 
