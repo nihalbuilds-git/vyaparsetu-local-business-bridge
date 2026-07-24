@@ -80,11 +80,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get("authorization");
+    const userId = await userIdFromAuth(authHeader);
+
     const identity =
-      req.headers.get("authorization")?.slice(-32) ||
+      authHeader?.slice(-32) ||
       req.headers.get("x-forwarded-for") ||
       "anon";
     if (!checkRateLimit(identity)) {
+      await audit(userId, "edge.ai_assistant", "denied", { reason: "rate_limit" });
       return new Response(JSON.stringify({ error: "Too many requests. Please wait a minute and try again." }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -96,6 +100,8 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    await audit(userId, "edge.ai_assistant", "ok", { messages: messages.length });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
