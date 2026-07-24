@@ -34,6 +34,7 @@ import Privacy from "./pages/legal/Privacy";
 import Terms from "./pages/legal/Terms";
 import Refund from "./pages/legal/Refund";
 import OAuthConsent from "./pages/OAuthConsent";
+import SecurityLog from "./pages/SecurityLog";
 import AIChatWidget from "./components/AIChatWidget";
 import CookieConsent from "./components/CookieConsent";
 
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
               <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
               <Route path="/whatsapp-reminders" element={<ProtectedRoute><WhatsAppRemindersPage /></ProtectedRoute>} />
+              <Route path="/security-log" element={<ProtectedRoute><SecurityLog /></ProtectedRoute>} />
               <Route path="/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
               <Route path="*" element={<NotFound />} />

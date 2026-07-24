@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2, Camera, Users, Phone, Briefcase, IndianRupee, Search } from "lucide-react";
+import { extractStoragePath, logAudit } from "@/lib/audit";
 
 interface Worker {
   id: string;
@@ -50,7 +51,19 @@ export default function Workers() {
     const { data: biz } = await supabase.from("businesses").select("id").eq("owner_id", user.id).maybeSingle();
     if (biz) setBusinessId(biz.id);
     const { data } = await supabase.from("workers").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    setWorkers((data as Worker[]) || []);
+    const list = (data as Worker[]) || [];
+    // Resolve avatar paths to short-lived signed URLs (bucket is private).
+    const paths = list.map((w) => extractStoragePath("worker-avatars", w.avatar_url)).filter(Boolean) as string[];
+    if (paths.length) {
+      const { data: signed } = await supabase.storage.from("worker-avatars").createSignedUrls(paths, 3600);
+      const map = new Map<string, string>();
+      (signed || []).forEach((s) => { if (s.path && s.signedUrl) map.set(s.path, s.signedUrl); });
+      list.forEach((w) => {
+        const p = extractStoragePath("worker-avatars", w.avatar_url);
+        if (p && map.has(p)) w.avatar_url = map.get(p)!;
+      });
+    }
+    setWorkers(list);
     setLoading(false);
   };
 
@@ -72,10 +85,12 @@ export default function Workers() {
     const { error } = await supabase.storage.from("worker-avatars").upload(path, avatarFile, { upsert: true });
     if (error) {
       toast({ title: t("uploadFailed"), description: error.message, variant: "destructive" });
+      logAudit("storage.upload", { resource: `worker-avatars/${path}`, status: "error", metadata: { message: error.message } });
       return null;
     }
-    const { data: urlData } = supabase.storage.from("worker-avatars").getPublicUrl(path);
-    return urlData.publicUrl;
+    logAudit("storage.upload", { resource: `worker-avatars/${path}` });
+    // Store the path (not a URL) so we can mint fresh signed URLs on read.
+    return path;
   };
 
   const handleSave = async () => {

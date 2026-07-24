@@ -1,9 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+async function audit(userId: string | null, event: string, status: string, metadata: Record<string, unknown> = {}) {
+  if (!userId) return;
+  try {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    await admin.from("audit_logs").insert({ user_id: userId, event_type: event, status, metadata });
+  } catch (_) { /* silent */ }
+}
+
+async function userIdFromAuth(authHeader: string | null): Promise<string | null> {
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  try {
+    const client = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data } = await client.auth.getUser(authHeader.replace("Bearer ", ""));
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
 
 const SYSTEM_PROMPT = `You are "VyaparSetu AI" — an incredibly smart, versatile, and friendly AI assistant. You can help with ANYTHING the user asks.
 
@@ -56,11 +80,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get("authorization");
+    const userId = await userIdFromAuth(authHeader);
+
     const identity =
-      req.headers.get("authorization")?.slice(-32) ||
+      authHeader?.slice(-32) ||
       req.headers.get("x-forwarded-for") ||
       "anon";
     if (!checkRateLimit(identity)) {
+      await audit(userId, "edge.ai_assistant", "denied", { reason: "rate_limit" });
       return new Response(JSON.stringify({ error: "Too many requests. Please wait a minute and try again." }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -72,6 +100,8 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    await audit(userId, "edge.ai_assistant", "ok", { messages: messages.length });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
