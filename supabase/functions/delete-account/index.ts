@@ -50,6 +50,11 @@ Deno.serve(async (req) => {
       await admin.from(t).delete().eq("user_id", userId);
     }
 
+    // Audit BEFORE deleting the auth user (row will remain via ON DELETE SET NULL).
+    try {
+      await admin.from("audit_logs").insert({ user_id: userId, event_type: "account.deleted", status: "ok" });
+    } catch (_) { /* silent */ }
+
     // Finally delete the auth user
     const { error: delErr } = await admin.auth.admin.deleteUser(userId);
     if (delErr) throw delErr;
