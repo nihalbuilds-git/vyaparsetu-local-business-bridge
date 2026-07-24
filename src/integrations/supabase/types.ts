@@ -105,6 +105,42 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json
+          resource: string | null
+          status: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          resource?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          resource?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           address: string | null
@@ -638,6 +674,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      log_audit_event: {
+        Args: {
+          _event_type: string
+          _metadata?: Json
+          _resource?: string
+          _status?: string
+        }
+        Returns: string
+      }
       owns_business: { Args: { _business_id: string }; Returns: boolean }
     }
     Enums: {
