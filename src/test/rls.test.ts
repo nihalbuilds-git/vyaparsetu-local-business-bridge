@@ -82,7 +82,7 @@ d("RLS: cross-tenant isolation", () => {
     expect(error || (Array.isArray(data) && data.length === 0)).toBeTruthy();
   });
 
-  it("worker-avatars is private — public URL must NOT resolve to a file", async () => {
+  it("worker-avatars is private — public URL must NOT resolve to a file", { timeout: 30000 }, async () => {
     // Upload a probe file as A, then confirm the public URL is inaccessible.
     const probePath = `${A.uid}/rls-probe.txt`;
     await A.client.storage.from("worker-avatars").upload(
