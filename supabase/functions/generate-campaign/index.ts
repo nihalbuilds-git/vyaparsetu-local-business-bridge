@@ -200,11 +200,16 @@ ${image_prompt}`;
       platform: platform || "general",
     });
 
+    await audit(auditUserId, "edge.generate_campaign", "ok", {
+      business_id, campaign_type, platform: platform || "general", poster: Boolean(poster_url),
+    });
+
     return new Response(JSON.stringify({ message, image_prompt, poster_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Campaign generation error:", e);
+    await audit(auditUserId, "edge.generate_campaign", "error", { message: e instanceof Error ? e.message : "unknown" });
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
