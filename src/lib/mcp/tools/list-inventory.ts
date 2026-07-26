@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { auditMcp } from "../audit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
@@ -20,10 +21,14 @@ export default defineTool({
   handler: async ({ low_stock_only }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb(ctx).from("inventory_items").select("*").order("name");
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_inventory", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
     const items = low_stock_only
       ? (data ?? []).filter((i: any) => typeof i.low_stock_threshold === "number" && i.quantity <= i.low_stock_threshold)
       : data ?? [];
+    await auditMcp(ctx, "list_inventory", "ok", { count: items.length });
     return { content: [{ type: "text", text: JSON.stringify(items) }], structuredContent: { items } };
   },
 });

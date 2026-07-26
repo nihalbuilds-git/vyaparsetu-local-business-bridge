@@ -6,10 +6,33 @@
 import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.24.0";
 
 // src/lib/mcp/tools/get-business-profile.ts
+import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.95.3";
+
+// src/lib/mcp/audit.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.95.3";
+async function auditMcp(ctx, tool, status = "ok", metadata = {}) {
+  try {
+    if (!ctx.isAuthenticated()) return;
+    const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+    await client.from("audit_logs").insert({
+      user_id: ctx.getUserId(),
+      event_type: `mcp.${tool}`,
+      resource: "mcp",
+      status,
+      metadata,
+      user_agent: "mcp-client"
+    });
+  } catch {
+  }
+}
+
+// src/lib/mcp/tools/get-business-profile.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.24.0";
 function sb(ctx) {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -23,16 +46,20 @@ var get_business_profile_default = defineTool({
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb(ctx).from("businesses").select("id,name,category,address,created_at").eq("owner_id", ctx.getUserId());
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "get_business_profile", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "get_business_profile", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { businesses: data ?? [] } };
   }
 });
 
 // src/lib/mcp/tools/list-workers.ts
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.95.3";
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.95.3";
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.24.0";
 function sb2(ctx) {
-  return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -46,17 +73,21 @@ var list_workers_default = defineTool2({
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb2(ctx).from("workers").select("id,name,role,phone,daily_salary,joined_date").order("created_at", { ascending: false });
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_workers", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "list_workers", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { workers: data ?? [] } };
   }
 });
 
 // src/lib/mcp/tools/list-khata-entries.ts
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.95.3";
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.95.3";
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z } from "npm:zod@^3.25.76";
 function sb3(ctx) {
-  return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -75,17 +106,21 @@ var list_khata_entries_default = defineTool3({
     let q = sb3(ctx).from("khata_entries").select("id,customer_name,customer_phone,amount,entry_type,description,date").order("date", { ascending: false }).limit(limit ?? 50);
     if (customer_name) q = q.ilike("customer_name", `%${customer_name}%`);
     const { data, error } = await q;
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_khata_entries", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "list_khata_entries", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { entries: data ?? [] } };
   }
 });
 
 // src/lib/mcp/tools/add-khata-entry.ts
-import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.95.3";
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.95.3";
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z2 } from "npm:zod@^3.25.76";
 function sb4(ctx) {
-  return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -106,17 +141,21 @@ var add_khata_entry_default = defineTool4({
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb4(ctx).from("khata_entries").insert(input).select().single();
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "add_khata_entry", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "add_khata_entry", "ok", { amount: input.amount, entry_type: input.entry_type });
     return { content: [{ type: "text", text: `Added \u20B9${input.amount} ${input.entry_type} for ${input.customer_name}` }], structuredContent: { entry: data } };
   }
 });
 
 // src/lib/mcp/tools/list-inventory.ts
-import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.95.3";
+import { createClient as createClient6 } from "npm:@supabase/supabase-js@^2.95.3";
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z3 } from "npm:zod@^3.25.76";
 function sb5(ctx) {
-  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient6(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -132,18 +171,22 @@ var list_inventory_default = defineTool5({
   handler: async ({ low_stock_only }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb5(ctx).from("inventory_items").select("*").order("name");
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_inventory", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
     const items = low_stock_only ? (data ?? []).filter((i) => typeof i.low_stock_threshold === "number" && i.quantity <= i.low_stock_threshold) : data ?? [];
+    await auditMcp(ctx, "list_inventory", "ok", { count: items.length });
     return { content: [{ type: "text", text: JSON.stringify(items) }], structuredContent: { items } };
   }
 });
 
 // src/lib/mcp/tools/list-expenses.ts
-import { createClient as createClient6 } from "npm:@supabase/supabase-js@^2.95.3";
+import { createClient as createClient7 } from "npm:@supabase/supabase-js@^2.95.3";
 import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z4 } from "npm:zod@^3.25.76";
 function sb6(ctx) {
-  return createClient6(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient7(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -159,7 +202,11 @@ var list_expenses_default = defineTool6({
   handler: async ({ limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb6(ctx).from("expenses").select("*").order("date", { ascending: false }).limit(limit ?? 50);
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_expenses", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "list_expenses", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { expenses: data ?? [] } };
   }
 });

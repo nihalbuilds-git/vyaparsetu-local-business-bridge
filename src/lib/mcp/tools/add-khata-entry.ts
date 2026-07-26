@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { auditMcp } from "../audit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
@@ -25,7 +26,11 @@ export default defineTool({
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb(ctx).from("khata_entries").insert(input).select().single();
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "add_khata_entry", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "add_khata_entry", "ok", { amount: input.amount, entry_type: input.entry_type });
     return { content: [{ type: "text", text: `Added ₹${input.amount} ${input.entry_type} for ${input.customer_name}` }], structuredContent: { entry: data } };
   },
 });
