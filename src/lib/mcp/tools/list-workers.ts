@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { auditMcp } from "../audit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 
 function sb(ctx: ToolContext) {
@@ -20,7 +21,11 @@ export default defineTool({
       .from("workers")
       .select("id,name,role,phone,daily_salary,joined_date")
       .order("created_at", { ascending: false });
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_workers", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "list_workers", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { workers: data ?? [] } };
   },
 });

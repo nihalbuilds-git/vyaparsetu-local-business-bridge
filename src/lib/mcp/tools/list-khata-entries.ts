@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { auditMcp } from "../audit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
@@ -23,7 +24,11 @@ export default defineTool({
     let q = sb(ctx).from("khata_entries").select("id,customer_name,customer_phone,amount,entry_type,description,date").order("date", { ascending: false }).limit(limit ?? 50);
     if (customer_name) q = q.ilike("customer_name", `%${customer_name}%`);
     const { data, error } = await q;
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "list_khata_entries", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "list_khata_entries", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { entries: data ?? [] } };
   },
 });

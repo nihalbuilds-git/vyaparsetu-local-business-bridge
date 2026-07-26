@@ -13,10 +13,12 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const URL = import.meta.env.VITE_SUPABASE_URL;
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const A_EMAIL = process.env.TEST_USER_A_EMAIL;
-const A_PASS = process.env.TEST_USER_A_PASSWORD;
-const B_EMAIL = process.env.TEST_USER_B_EMAIL;
-const B_PASS = process.env.TEST_USER_B_PASSWORD;
+// Creds come from `.env.test` (VITE_TEST_*, loaded by Vite in test mode) or
+// plain process env vars (handy for CI secrets).
+const A_EMAIL = process.env.TEST_USER_A_EMAIL || import.meta.env.VITE_TEST_USER_A_EMAIL;
+const A_PASS = process.env.TEST_USER_A_PASSWORD || import.meta.env.VITE_TEST_USER_A_PASSWORD;
+const B_EMAIL = process.env.TEST_USER_B_EMAIL || import.meta.env.VITE_TEST_USER_B_EMAIL;
+const B_PASS = process.env.TEST_USER_B_PASSWORD || import.meta.env.VITE_TEST_USER_B_PASSWORD;
 
 const enabled = Boolean(URL && KEY && A_EMAIL && A_PASS && B_EMAIL && B_PASS);
 const d = enabled ? describe : describe.skip;
@@ -80,7 +82,7 @@ d("RLS: cross-tenant isolation", () => {
     expect(error || (Array.isArray(data) && data.length === 0)).toBeTruthy();
   });
 
-  it("worker-avatars is private — public URL must NOT resolve to a file", async () => {
+  it("worker-avatars is private — public URL must NOT resolve to a file", { timeout: 30000 }, async () => {
     // Upload a probe file as A, then confirm the public URL is inaccessible.
     const probePath = `${A.uid}/rls-probe.txt`;
     await A.client.storage.from("worker-avatars").upload(

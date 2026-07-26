@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { auditMcp } from "../audit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 
 function sb(ctx: ToolContext) {
@@ -17,7 +18,11 @@ export default defineTool({
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const { data, error } = await sb(ctx).from("businesses").select("id,name,category,address,created_at").eq("owner_id", ctx.getUserId());
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) {
+      await auditMcp(ctx, "get_business_profile", "error", { message: error.message });
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    await auditMcp(ctx, "get_business_profile", "ok", { count: (data ?? []).length });
     return { content: [{ type: "text", text: JSON.stringify(data) }], structuredContent: { businesses: data ?? [] } };
   },
 });
