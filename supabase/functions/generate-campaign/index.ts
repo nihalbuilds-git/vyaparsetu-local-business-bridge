@@ -7,12 +7,32 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function userIdFromAuth(authHeader: string | null): Promise<string | null> {
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  try {
+    const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+    const { data } = await client.auth.getUser(authHeader.replace("Bearer ", ""));
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
+
+async function audit(userId: string | null, event: string, status: string, metadata: Record<string, unknown> = {}) {
+  if (!userId) return;
+  try {
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    await admin.from("audit_logs").insert({ user_id: userId, event_type: event, resource: "edge/generate-campaign", status, metadata });
+  } catch (_) { /* silent */ }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const auditUserId = await userIdFromAuth(req.headers.get("Authorization"));
 
   try {
     const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt, platform } = await req.json();
     if (!business_id || !campaign_type || !offer_text) {
+      await audit(auditUserId, "edge.generate_campaign", "error", { reason: "missing_fields" });
       return new Response(JSON.stringify({ error: "business_id, campaign_type, and offer_text are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
