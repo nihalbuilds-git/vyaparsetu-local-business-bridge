@@ -1,6 +1,7 @@
 // Razorpay: Verify Payment
 // Verifies the HMAC signature returned by Razorpay Checkout and activates subscription.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { rateLimitResponse } from "../_shared/rate-limit.ts";
 import { createHmac } from "node:crypto";
 
 const corsHeaders = {
@@ -11,6 +12,9 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const limited = rateLimitResponse(req, { limit: 20, windowMs: 60_000, scope: "rzp-verify" }, corsHeaders);
+  if (limited) return limited;
 
   try {
     const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");

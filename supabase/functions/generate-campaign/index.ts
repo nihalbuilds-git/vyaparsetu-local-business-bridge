@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +29,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const auditUserId = await userIdFromAuth(req.headers.get("Authorization"));
+
+  // Generation is expensive (text + image): 10 requests / 5 min per caller.
+  const limited = rateLimitResponse(req, { limit: 10, windowMs: 5 * 60_000, scope: "generate-campaign" }, corsHeaders);
+  if (limited) {
+    await audit(auditUserId, "edge.generate_campaign", "denied", { reason: "rate_limit" });
+    return limited;
+  }
+
 
   try {
     const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt, platform } = await req.json();

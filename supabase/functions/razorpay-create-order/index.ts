@@ -2,6 +2,7 @@
 // Creates a Razorpay order for the selected plan and logs a `payments` row.
 // Requires secrets: RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +17,9 @@ const PLAN_PRICES_PAISE: Record<string, number> = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const limited = rateLimitResponse(req, { limit: 10, windowMs: 60_000, scope: "rzp-create-order" }, corsHeaders);
+  if (limited) return limited;
 
   try {
     const keyId = Deno.env.get("RAZORPAY_KEY_ID");

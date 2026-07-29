@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { rateLimitResponse } from "../_shared/rate-limit.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -59,23 +60,6 @@ RULES:
 - NEVER refuse to answer a question — always try your best to help
 - For sensitive topics (legal/medical), give general guidance but recommend consulting a professional`;
 
-// Simple in-memory rate limiter (per edge instance): 20 requests / 60s per identity
-const rateBuckets = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 20;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(id: string): boolean {
-  const now = Date.now();
-  const bucket = rateBuckets.get(id);
-  if (!bucket || bucket.resetAt < now) {
-    rateBuckets.set(id, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-  if (bucket.count >= RATE_LIMIT) return false;
-  bucket.count++;
-  return true;
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -83,16 +67,13 @@ serve(async (req) => {
     const authHeader = req.headers.get("authorization");
     const userId = await userIdFromAuth(authHeader);
 
-    const identity =
-      authHeader?.slice(-32) ||
-      req.headers.get("x-forwarded-for") ||
-      "anon";
-    if (!checkRateLimit(identity)) {
+    // 20 requests / 60s per caller (shared limiter used by all edge functions).
+    const limited = rateLimitResponse(req, { limit: 20, windowMs: 60_000, scope: "ai-assistant" }, corsHeaders);
+    if (limited) {
       await audit(userId, "edge.ai_assistant", "denied", { reason: "rate_limit" });
-      return new Response(JSON.stringify({ error: "Too many requests. Please wait a minute and try again." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return limited;
     }
+
 
     const { messages } = await req.json();
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
