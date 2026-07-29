@@ -30,6 +30,14 @@ serve(async (req) => {
 
   const auditUserId = await userIdFromAuth(req.headers.get("Authorization"));
 
+  // Generation is expensive (text + image): 10 requests / 5 min per caller.
+  const limited = rateLimitResponse(req, { limit: 10, windowMs: 5 * 60_000, scope: "generate-campaign" }, corsHeaders);
+  if (limited) {
+    await audit(auditUserId, "edge.generate_campaign", "denied", { reason: "rate_limit" });
+    return limited;
+  }
+
+
   try {
     const { business_id, campaign_type, offer_text, poster_only, existing_message, existing_image_prompt, platform } = await req.json();
     if (!business_id || !campaign_type || !offer_text) {
