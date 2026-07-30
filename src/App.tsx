@@ -39,6 +39,8 @@ const Terms = lazy(() => import("./pages/legal/Terms"));
 const Refund = lazy(() => import("./pages/legal/Refund"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const SecurityLog = lazy(() => import("./pages/SecurityLog"));
+const SecurityAlerts = lazy(() => import("./pages/SecurityAlerts"));
+
 const AIChatWidget = lazy(() => import("./components/AIChatWidget"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
 
