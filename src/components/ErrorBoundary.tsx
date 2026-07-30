@@ -26,8 +26,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[ErrorBoundary]", this.props.scope ?? "app", error, info.componentStack);
+    void reportError(error, {
+      scope: this.props.scope ?? "app",
+      componentStack: info.componentStack ?? undefined,
+    });
   }
+
 
   private reset = () => this.setState({ error: null });
 
