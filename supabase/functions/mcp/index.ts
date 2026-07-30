@@ -29,6 +29,51 @@ async function auditMcp(ctx, tool, status = "ok", metadata = {}) {
   }
 }
 
+// src/lib/mcp/rate-limit.ts
+var buckets = /* @__PURE__ */ new Map();
+var DEFAULT = { limit: 60, windowMs: 6e4 };
+var WRITE_LIMIT = { limit: 20, windowMs: 6e4 };
+function identity(ctx) {
+  try {
+    return ctx.getUserId() ?? ctx.getClientId() ?? "anon";
+  } catch {
+    return "anon";
+  }
+}
+function checkMcpRateLimit(ctx, scope, opts = DEFAULT) {
+  const key = `${scope}:${identity(ctx)}`;
+  const now = Date.now();
+  const bucket = buckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt: now + opts.windowMs });
+    if (buckets.size > 5e3) {
+      for (const [k, v] of buckets) if (v.resetAt <= now) buckets.delete(k);
+    }
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+  if (bucket.count >= opts.limit) {
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt - now) / 1e3))
+    };
+  }
+  bucket.count++;
+  return { allowed: true, retryAfterSeconds: 0 };
+}
+function mcpRateLimited(ctx, scope, opts) {
+  const result = checkMcpRateLimit(ctx, scope, opts);
+  if (result.allowed) return null;
+  return {
+    content: [
+      {
+        type: "text",
+        text: `Rate limit reached for ${scope}. Please retry in ${result.retryAfterSeconds}s.`
+      }
+    ],
+    isError: true
+  };
+}
+
 // src/lib/mcp/tools/get-business-profile.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.24.0";
 function sb(ctx) {
@@ -45,6 +90,11 @@ var get_business_profile_default = defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "get_business_profile");
+    if (limited) {
+      await auditMcp(ctx, "get_business_profile", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb(ctx).from("businesses").select("id,name,category,address,created_at").eq("owner_id", ctx.getUserId());
     if (error) {
       await auditMcp(ctx, "get_business_profile", "error", { message: error.message });
@@ -72,6 +122,11 @@ var list_workers_default = defineTool2({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "list_workers");
+    if (limited) {
+      await auditMcp(ctx, "list_workers", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb2(ctx).from("workers").select("id,name,role,phone,daily_salary,joined_date").order("created_at", { ascending: false });
     if (error) {
       await auditMcp(ctx, "list_workers", "error", { message: error.message });
@@ -103,6 +158,11 @@ var list_khata_entries_default = defineTool3({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ customer_name, limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "list_khata_entries");
+    if (limited) {
+      await auditMcp(ctx, "list_khata_entries", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     let q = sb3(ctx).from("khata_entries").select("id,customer_name,customer_phone,amount,entry_type,description,date").order("date", { ascending: false }).limit(limit ?? 50);
     if (customer_name) q = q.ilike("customer_name", `%${customer_name}%`);
     const { data, error } = await q;
@@ -140,6 +200,11 @@ var add_khata_entry_default = defineTool4({
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "add_khata_entry", WRITE_LIMIT);
+    if (limited) {
+      await auditMcp(ctx, "add_khata_entry", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb4(ctx).from("khata_entries").insert(input).select().single();
     if (error) {
       await auditMcp(ctx, "add_khata_entry", "error", { message: error.message });
@@ -170,6 +235,11 @@ var list_inventory_default = defineTool5({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ low_stock_only }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "list_inventory");
+    if (limited) {
+      await auditMcp(ctx, "list_inventory", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb5(ctx).from("inventory_items").select("*").order("name");
     if (error) {
       await auditMcp(ctx, "list_inventory", "error", { message: error.message });
@@ -201,6 +271,11 @@ var list_expenses_default = defineTool6({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "list_expenses");
+    if (limited) {
+      await auditMcp(ctx, "list_expenses", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb6(ctx).from("expenses").select("*").order("date", { ascending: false }).limit(limit ?? 50);
     if (error) {
       await auditMcp(ctx, "list_expenses", "error", { message: error.message });
