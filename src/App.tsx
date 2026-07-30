@@ -39,6 +39,8 @@ const Terms = lazy(() => import("./pages/legal/Terms"));
 const Refund = lazy(() => import("./pages/legal/Refund"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const SecurityLog = lazy(() => import("./pages/SecurityLog"));
+const SecurityAlerts = lazy(() => import("./pages/SecurityAlerts"));
+
 const AIChatWidget = lazy(() => import("./components/AIChatWidget"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
 
@@ -98,6 +100,8 @@ const App = () => (
                   <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
                   <Route path="/whatsapp-reminders" element={<ProtectedRoute><WhatsAppRemindersPage /></ProtectedRoute>} />
                   <Route path="/security-log" element={<ProtectedRoute><SecurityLog /></ProtectedRoute>} />
+                  <Route path="/security-alerts" element={<ProtectedRoute><SecurityAlerts /></ProtectedRoute>} />
+
                   <Route path="/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
                   <Route path="/profile" element={<Navigate to="/business-profile" replace />} />
                   <Route path="*" element={<NotFound />} />
