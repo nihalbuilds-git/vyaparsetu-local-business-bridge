@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { auditMcp } from "../audit";
+import { mcpRateLimited } from "../rate-limit";
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
@@ -20,6 +21,11 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const limited = mcpRateLimited(ctx, "list_expenses");
+    if (limited) {
+      await auditMcp(ctx, "list_expenses", "denied", { reason: "rate_limit" });
+      return limited;
+    }
     const { data, error } = await sb(ctx).from("expenses").select("*").order("date", { ascending: false }).limit(limit ?? 50);
     if (error) {
       await auditMcp(ctx, "list_expenses", "error", { message: error.message });
